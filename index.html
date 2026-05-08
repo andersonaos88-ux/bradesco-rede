@@ -1,757 +1,1057 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bradesco Saúde — Apresentação</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --red:    #CC0000;
-      --red2:   #E30613;
-      --dark:   #1A1A1A;
-      --muted:  #666;
-      --border: #E5E5E5;
-      --bg:     #F8F8F8;
-      --card:   #FFFFFF;
-      --green:  #1B8A3E;
-    }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--dark); min-height: 100vh; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bradesco Rede — Proposta Comercial</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --red:    #CC0000;
+  --red2:   #a00000;
+  --navy:   #1A0000;
+  --gray-bg:#F4F4F8;
+  --border: #E0E0EC;
+  --text:   #1A1A3E;
+  --muted:  #6B6B8A;
+  --white:  #FFFFFF;
+  --green:  #16a34a;
+  --blue:   #2563EB;
+  --bradesco: #CC0000;
+}
+body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-bg); color: var(--text); min-height: 100vh; }
 
-    /* ── UPLOAD SCREEN ── */
-    #upload-screen {
-      min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 40px 20px;
-    }
-    .brand-header {
-      display: flex; align-items: center; gap: 16px; margin-bottom: 48px;
-    }
-    .brand-logo {
-      width: 56px; height: 56px; background: var(--red);
-      border-radius: 14px; display: flex; align-items: center; justify-content: center;
-      font-size: 22px; font-weight: 900; color: white; letter-spacing: -1px;
-    }
-    .brand-name { font-size: 22px; font-weight: 800; color: var(--dark); }
-    .brand-sub  { font-size: 12px; color: var(--muted); font-weight: 500; }
-    .upload-card {
-      background: white; border: 2px dashed #DDDDDD; border-radius: 24px;
-      padding: 60px 48px; text-align: center; max-width: 540px; width: 100%;
-      cursor: pointer; transition: border-color .2s, box-shadow .2s;
-    }
-    .upload-card:hover, .upload-card.drag-over {
-      border-color: var(--red); box-shadow: 0 0 0 4px rgba(204,0,0,.08);
-    }
-    .upload-icon {
-      width: 72px; height: 72px; background: #FFF0F0; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 24px; font-size: 32px;
-    }
-    .upload-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-    .upload-sub   { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
-    .upload-btn {
-      background: var(--red); color: white; border: none; border-radius: 10px;
-      padding: 13px 28px; font-size: 14px; font-weight: 700; cursor: pointer;
-      font-family: 'Inter', sans-serif; transition: background .2s;
-    }
-    .upload-btn:hover { background: var(--red2); }
-    .upload-hint { font-size: 12px; color: #AAA; margin-top: 16px; }
-    #file-input { display: none; }
-    #loading {
-      display: none; flex-direction: column; align-items: center; gap: 16px;
-      padding: 40px;
-    }
-    .spinner {
-      width: 48px; height: 48px; border: 4px solid #FFCCCC;
-      border-top-color: var(--red); border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+/* ── HEADER ── */
+.header { background: var(--red); color: #fff; padding: 14px 28px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,.4); }
+.header .logo { width: 38px; height: 38px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; color: var(--red); letter-spacing: -1px; }
+.header h1 { font-size: 17px; font-weight: 700; }
+.header p  { font-size: 11px; color: rgba(255,255,255,.6); }
 
-    /* ── PRESENTATION ── */
-    #presentation { display: none; }
-    .print-bar {
-      position: sticky; top: 0; z-index: 100;
-      background: white; border-bottom: 1px solid var(--border);
-      padding: 12px 40px; display: flex; align-items: center; justify-content: space-between;
-    }
-    .print-bar-brand { font-size: 14px; font-weight: 700; color: var(--red); }
-    .print-bar-actions { display: flex; gap: 10px; }
-    .btn-outline {
-      background: white; border: 1.5px solid var(--border); color: var(--dark);
-      border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600;
-      cursor: pointer; font-family: 'Inter', sans-serif; transition: border-color .2s;
-    }
-    .btn-outline:hover { border-color: var(--red); color: var(--red); }
-    .btn-primary {
-      background: var(--red); color: white; border: none;
-      border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 700;
-      cursor: pointer; font-family: 'Inter', sans-serif; transition: background .2s;
-    }
-    .btn-primary:hover { background: var(--red2); }
+/* ── LAYOUT ── */
+.layout { display: grid; grid-template-columns: 420px 1fr; min-height: calc(100vh - 66px); }
 
-    .slides { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; display: flex; flex-direction: column; gap: 24px; }
+/* ── SIDEBAR ── */
+.sidebar { background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 66px; height: calc(100vh - 66px); }
+.sidebar-body { flex: 1; padding: 20px; overflow-y: auto; }
+.sidebar-footer { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--white); }
+.stitle { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; color: var(--red); border-bottom: 2px solid var(--red); padding-bottom: 6px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.stitle span { font-size: 15px; }
+.fsec { margin-bottom: 24px; }
+.fg { margin-bottom: 11px; }
+.fg label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .6px; }
+.fg input, .fg select { width: 100%; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text); background: var(--white); outline: none; transition: border-color .15s, box-shadow .15s; font-family: inherit; }
+.fg input:focus, .fg select:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(204,0,0,.1); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
-    /* SLIDE BASE */
-    .slide {
-      background: white; border-radius: 20px; overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,.07);
-    }
+/* cop toggle */
+.cop-toggle { display: flex; gap: 8px; }
+.cop-btn { flex: 1; padding: 8px 6px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; background: var(--white); color: var(--muted); transition: all .15s; text-align: center; font-family: inherit; }
+.cop-btn.active-sim { border-color: #16a34a; background: #f0fdf4; color: #15803d; }
+.cop-btn.active-nao { border-color: #dc2626; background: #fef2f2; color: #b91c1c; }
 
-    /* CAPA */
-    .slide-cover {
-      background: linear-gradient(135deg, #CC0000 0%, #990000 100%);
-      padding: 56px 48px; color: white; position: relative; overflow: hidden;
-    }
-    .slide-cover::after {
-      content: 'B'; position: absolute; right: -20px; bottom: -40px;
-      font-size: 280px; font-weight: 900; color: rgba(255,255,255,.05); line-height: 1;
-    }
-    .cover-tag {
-      display: inline-block; background: rgba(255,255,255,.15);
-      border: 1px solid rgba(255,255,255,.25); border-radius: 20px;
-      padding: 5px 14px; font-size: 11px; font-weight: 700; letter-spacing: 1px;
-      text-transform: uppercase; margin-bottom: 20px;
-    }
-    .cover-title  { font-size: 36px; font-weight: 900; line-height: 1.15; margin-bottom: 8px; }
-    .cover-sub    { font-size: 16px; opacity: .8; margin-bottom: 32px; }
-    .cover-meta   { display: flex; gap: 32px; }
-    .cover-meta-item label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: .6; display: block; margin-bottom: 3px; }
-    .cover-meta-item span  { font-size: 15px; font-weight: 700; }
-    .bradesco-logo-text {
-      position: absolute; top: 40px; right: 48px;
-      font-size: 13px; font-weight: 800; opacity: .7; letter-spacing: .5px;
-    }
+/* ins dot */
+.ins-wrap { position: relative; }
+.ins-dot { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; border-radius: 50%; pointer-events: none; }
+.ins-wrap select { padding-left: 26px; }
 
-    /* SECTION HEADER */
-    .section-head {
-      display: flex; align-items: center; gap: 12px;
-      padding: 24px 28px 16px; border-bottom: 1px solid var(--border);
-    }
-    .section-icon {
-      width: 36px; height: 36px; background: #FFF0F0; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
-    }
-    .section-title { font-size: 16px; font-weight: 800; }
-    .section-sub   { font-size: 12px; color: var(--muted); font-weight: 400; }
+/* check option */
+.check-opt { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--gray-bg); border: 1.5px solid var(--border); cursor: pointer; margin-bottom: 8px; transition: border-color .15s; }
+.check-opt:hover { border-color: var(--red); }
+.check-opt input { accent-color: var(--red); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+.check-opt label { font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; }
 
-    /* SUMMARY CARDS */
-    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; padding: 24px 28px; }
-    .summary-card {
-      background: var(--bg); border-radius: 14px; padding: 20px 16px; text-align: center;
-    }
-    .summary-card.highlight { background: #FFF0F0; }
-    .summary-card .s-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 6px; }
-    .summary-card .s-value { font-size: 26px; font-weight: 900; color: var(--dark); line-height: 1; }
-    .summary-card .s-value.red { color: var(--red); }
-    .summary-card .s-detail { font-size: 11px; color: var(--muted); margin-top: 4px; }
+/* toggle row */
+.toggle-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: #fff8f8; border: 1.5px solid #ffcccc; cursor: pointer; margin-bottom: 8px; }
+.toggle-row input { accent-color: var(--red); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+.toggle-row label { font-size: 11px; font-weight: 700; color: #b91c1c; cursor: pointer; }
 
-    /* PLAN DETAILS */
-    .plan-body { padding: 24px 28px; }
-    .plan-name-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--red); color: white; border-radius: 10px;
-      padding: 8px 16px; font-size: 15px; font-weight: 800; margin-bottom: 20px;
-    }
-    .plan-features { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
-    .feat-chip {
-      display: flex; align-items: center; gap: 6px;
-      background: #F0FFF4; border: 1px solid #BBDDCC; color: var(--green);
-      border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600;
-    }
-    .feat-chip.neutral { background: #F5F5F5; border-color: #DDD; color: var(--muted); }
-    .feat-chip.red-chip { background: #FFF0F0; border-color: #FFCCCC; color: var(--red); }
+/* logo upload */
+.logo-box { border: 2px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all .15s; margin-bottom: 10px; }
+.logo-box:hover { border-color: var(--red); background: #fff5f5; }
+.logo-box img { max-height: 50px; max-width: 180px; object-fit: contain; }
+.logo-box .ph { font-size: 12px; color: var(--muted); }
 
-    /* TABLES */
-    .table-wrap { padding: 0 28px 28px; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead tr { background: var(--red); color: white; }
-    thead th { padding: 10px 12px; font-weight: 700; text-align: right; font-size: 12px; white-space: nowrap; }
-    thead th:first-child { text-align: left; border-radius: 8px 0 0 0; }
-    thead th:last-child { border-radius: 0 8px 0 0; }
-    tbody tr:nth-child(even) { background: #FAFAFA; }
-    tbody tr:hover { background: #FFF5F5; }
-    tbody td { padding: 9px 12px; color: var(--dark); text-align: right; border-bottom: 1px solid #F0F0F0; }
-    tbody td:first-child { text-align: left; font-weight: 600; }
-    td.zero { color: #CCC; }
-    td.selected-row { font-weight: 800; color: var(--red); }
+/* PDF upload */
+.pdf-upload-box { border: 2px dashed #ffcccc; border-radius: 10px; padding: 12px 16px; cursor: pointer; transition: all .15s; margin-bottom: 10px; background: #fff8f8; }
+.pdf-upload-box:hover { border-color: var(--red); background: #fff0f0; }
+.pdf-upload-box .pu-title { font-size: 12px; font-weight: 700; color: var(--red); }
+.pdf-upload-box .pu-hint  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+#brad-pdf-status { font-size: 11px; color: var(--green); font-weight: 700; margin-bottom: 8px; min-height: 16px; }
 
-    /* COMPARISON TABLE */
-    .comp-wrap { padding: 0 28px 28px; overflow-x: auto; }
-    .comp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .comp-table thead tr { background: var(--red); color: white; }
-    .comp-table thead th { padding: 10px 10px; font-weight: 700; font-size: 11px; white-space: nowrap; text-align: center; }
-    .comp-table thead th:first-child { text-align: left; border-radius: 8px 0 0 0; min-width: 130px; }
-    .comp-table thead th:last-child { border-radius: 0 8px 0 0; }
-    .comp-table tbody tr { border-bottom: 1px solid #F0F0F0; }
-    .comp-table tbody tr:hover { background: #FFF5F5; }
-    .comp-table tbody tr.is-selected { background: #FFF0F0; }
-    .comp-table tbody tr.is-selected td { font-weight: 700; }
-    .comp-table tbody td { padding: 9px 10px; text-align: center; vertical-align: middle; }
-    .comp-table tbody td:first-child { text-align: left; font-weight: 600; }
-    .badge-check { color: var(--green); font-size: 16px; }
-    .badge-x     { color: #CCC; font-size: 16px; }
-    .selected-badge {
-      background: var(--red); color: white; border-radius: 4px;
-      padding: 2px 8px; font-size: 10px; font-weight: 700; margin-left: 6px;
-    }
-    .price-cell { font-weight: 800; color: var(--dark); white-space: nowrap; }
-    .price-cell small { font-size: 10px; color: var(--muted); font-weight: 400; display: block; }
+/* gen button */
+.gen-btn { width: 100%; padding: 13px; background: var(--red); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .2s; font-family: inherit; }
+.gen-btn:hover { background: var(--red2); box-shadow: 0 4px 18px rgba(204,0,0,.3); }
 
-    /* WAITING PERIODS */
-    .wait-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 0 28px 28px; }
-    @media (max-width: 600px) { .wait-grid { grid-template-columns: 1fr; } }
-    .wait-item {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 14px 0; border-bottom: 1px solid var(--border);
-    }
-    .wait-item:nth-child(odd) { padding-right: 20px; }
-    .wait-item:nth-child(even) { padding-left: 20px; border-left: 1px solid var(--border); }
-    .wait-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
-    .wait-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
-    .wait-vals { font-size: 11px; color: var(--muted); }
-    .wait-vals span { color: var(--green); font-weight: 700; }
+/* ── PREVIEW ── */
+.preview { padding: 28px 24px; overflow-y: auto; background: #C8C8CC; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.preview-bar { width: 100%; display: flex; align-items: center; justify-content: space-between; background: var(--white); border-radius: 10px; padding: 10px 18px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.preview-bar span { font-size: 12px; font-weight: 600; color: var(--muted); }
+.pdf-btn { padding: 8px 18px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s; font-family: inherit; }
+.pdf-btn:hover { background: var(--red2); }
+.pdf-btn:disabled { opacity: .6; cursor: not-allowed; }
+.slides-wrap { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.slide-box { box-shadow: 0 6px 28px rgba(0,0,0,.25); border-radius: 6px; overflow: hidden; }
+.empty { min-height: 360px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); gap: 10px; }
+.empty .icon { font-size: 44px; opacity: .35; }
 
-    /* DIFFERENTIALS */
-    .diff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 24px 28px; }
-    .diff-card {
-      border: 1px solid var(--border); border-radius: 14px; padding: 20px 16px;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .diff-card:hover { border-color: var(--red); box-shadow: 0 4px 12px rgba(204,0,0,.1); }
-    .diff-emoji { font-size: 28px; margin-bottom: 10px; display: block; }
-    .diff-name  { font-size: 14px; font-weight: 800; margin-bottom: 6px; }
-    .diff-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+/* ══════════════════════════════════
+   SLIDE STYLES
+══════════════════════════════════ */
 
-    /* FOOTER SLIDE */
-    .slide-footer {
-      background: linear-gradient(135deg, #1A1A1A 0%, #333 100%);
-      padding: 48px; color: white; text-align: center;
-    }
-    .footer-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-    .footer-sub   { font-size: 15px; opacity: .7; margin-bottom: 32px; }
-    .footer-cta {
-      display: inline-block; background: var(--red); color: white;
-      border-radius: 10px; padding: 14px 32px; font-size: 15px; font-weight: 700;
-      text-decoration: none;
-    }
-    .footer-note { font-size: 11px; opacity: .4; margin-top: 32px; }
+/* CAPA */
+.s-cover {
+  width: 960px; height: 540px;
+  background: linear-gradient(135deg, #8B0000 0%, #CC0000 55%, #E00000 100%);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 52px 60px;
+}
+.s-cover .bg-geo1 { position: absolute; right: -60px; top: -60px; width: 500px; height: 500px; border-radius: 50%; background: rgba(255,255,255,.06); }
+.s-cover .bg-geo2 { position: absolute; right: 100px; top: 40px; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,.04); }
+.s-cover .bg-lines { position: absolute; right: 40px; top: 0; width: 440px; height: 440px; background: repeating-linear-gradient(40deg,transparent,transparent 6px,rgba(255,255,255,.07) 6px,rgba(255,255,255,.07) 8px); border-radius: 50%; }
+.s-cover .logo-area { position: absolute; top: 36px; left: 56px; display: flex; align-items: flex-end; gap: 18px; }
+.s-cover .logo-area img { max-height: 48px; max-width: 180px; object-fit: contain; }
+.s-cover .logo-placeholder { background: rgba(255,255,255,.15); border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 800; color: rgba(255,255,255,.8); letter-spacing: 1px; }
+.s-cover .brad-badge { position: absolute; top: 40px; right: 56px; text-align: right; }
+.s-cover .brad-badge .b1 { font-size: 11px; font-weight: 900; color: rgba(255,255,255,.95); letter-spacing: 3px; text-transform: uppercase; }
+.s-cover .brad-badge .b2 { font-size: 9px; color: rgba(255,255,255,.55); letter-spacing: 2px; margin-top: 3px; text-transform: uppercase; }
+.s-cover .tag { font-size: 10px; letter-spacing: 2.5px; color: rgba(255,255,255,.55); text-transform: uppercase; margin-bottom: 12px; }
+.s-cover .title { font-size: 54px; font-weight: 300; color: #fff; line-height: 1.08; margin-bottom: 20px; }
+.s-cover .title strong { font-weight: 900; }
+.s-cover .company { font-size: 18px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+.s-cover .date { font-size: 13px; color: rgba(255,255,255,.6); }
 
-    /* PRINT */
-    @media print {
-      .print-bar { display: none !important; }
-      #upload-screen { display: none !important; }
-      #presentation { display: block !important; }
-      .slide { box-shadow: none; page-break-inside: avoid; }
-      body { background: white; }
-      .slides { padding: 0; gap: 32px; max-width: 100%; }
-    }
-  </style>
+/* COMPARISON */
+.s-comp { width: 960px; min-height: 540px; background: #fff; padding: 36px 44px 28px; position: relative; }
+.s-comp .s-title { text-align: center; font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 28px; }
+.s-comp .s-title em { font-style: normal; font-weight: 400; color: var(--muted); }
+.comp-grid { display: flex; gap: 0; align-items: stretch; }
+.comp-col { display: flex; flex-direction: column; }
+.comp-col.atual { width: 200px; flex-shrink: 0; }
+.comp-col.brad  { flex: 1; }
+.col-label { text-align: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text); margin-bottom: 10px; }
+.ins-tag { display: inline-block; padding: 4px 14px; border-radius: 20px; border: 1.5px solid; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.chart-wrap { height: 240px; position: relative; }
+.plan-meta { display: flex; flex-direction: column; align-items: center; margin-top: 6px; gap: 3px; }
+.plan-name-label { font-size: 10px; font-weight: 700; }
+.cop-chip { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: .4px; }
+.cop-chip.sim { background: #dcfce7; color: #15803d; }
+.cop-chip.nao { background: #fee2e2; color: #b91c1c; }
+.vidas-chip { font-size: 9px; color: var(--muted); }
+.reembolso-chip { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #eff6ff; color: #1d4ed8; }
+.ganho-chip { font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; letter-spacing: .3px; white-space: nowrap; }
+.ganho-chip.positivo { background: #dcfce7; color: #15803d; }
+.ganho-chip.negativo { background: #fee2e2; color: #b91c1c; }
+.ganho-chip.neutro   { background: #f1f5f9; color: var(--muted); }
+.ganho-label { font-size: 8px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+.vert-sep { width: 1px; background: var(--border); margin: 0 20px; }
+.divider  { height: 3px; background: linear-gradient(90deg, var(--red), #ff6666); border-radius: 2px; margin: 20px 0 12px; }
+.legend-row { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); font-weight: 700; }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+/* COP SLIDE */
+.s-cop { width: 960px; min-height: 540px; background: #fff; padding: 44px 56px; position: relative; }
+
+/* CARÊNCIAS SLIDE */
+.s-wait { width: 960px; min-height: 540px; background: #fff; padding: 44px 56px; position: relative; }
+.wait-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+.wait-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 10px; background: var(--gray-bg); border: 1.5px solid var(--border); }
+.wait-icon { font-size: 22px; flex-shrink: 0; }
+.wait-name { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.wait-tag { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; margin-right: 4px; }
+.wait-tag.zero { background: #dcfce7; color: #15803d; }
+.wait-tag.low  { background: #fef9c3; color: #854d0e; }
+.wait-tag.mid  { background: #fef2f2; color: #b91c1c; }
+
+/* DIFERENCIAIS */
+.s-diff { width: 960px; min-height: 540px; background: #fff; padding: 44px 56px; position: relative; }
+.diff-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 24px; }
+.diff-item { padding: 18px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--gray-bg); }
+.diff-icon { font-size: 28px; margin-bottom: 8px; }
+.diff-title { font-size: 13px; font-weight: 800; color: var(--red); margin-bottom: 5px; }
+.diff-desc  { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* BACK COVER */
+.s-back { width: 960px; height: 540px; background: linear-gradient(135deg, #8B0000, #CC0000); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.s-back .bg-geo { position: absolute; right: -80px; bottom: -80px; width: 400px; height: 400px; border-radius: 50%; background: rgba(255,255,255,.05); }
+
+/* slide section header */
+.slide-sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+.slide-sec-bar { width: 5px; border-radius: 3px; flex-shrink: 0; }
+.slide-sec-title { font-size: 21px; font-weight: 800; color: var(--text); }
+.slide-sec-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* logo watermark in slides */
+.slide-logo-wm { position: absolute; top: 20px; right: 36px; max-height: 30px; max-width: 110px; object-fit: contain; opacity: .5; }
+
+@media (max-width: 767px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .preview { padding: 16px 10px; }
+  .header p { display: none; }
+  .row2 { grid-template-columns: 1fr; }
+}
+</style>
 </head>
 <body>
 
-<!-- ── UPLOAD SCREEN ── -->
-<div id="upload-screen">
-  <div class="brand-header">
-    <div class="brand-logo">BS</div>
-    <div>
-      <div class="brand-name">Bradesco Saúde</div>
-      <div class="brand-sub">Gerador de Apresentação · Canal Rede</div>
+<header class="header">
+  <div class="logo">BR</div>
+  <div>
+    <h1>Bradesco Rede — Proposta Comercial</h1>
+    <p>Gerador de apresentação para corretores do Canal Rede</p>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar">
+    <div class="sidebar-body">
+
+      <!-- 1. Cliente -->
+      <div class="fsec">
+        <div class="stitle"><span>🏢</span> Dados do Cliente</div>
+        <div class="fg">
+          <label>Nome da empresa / cliente</label>
+          <input id="empresa" type="text" placeholder="Ex: Empresa ABC Ltda" oninput="render()">
+        </div>
+        <div class="row2">
+          <div class="fg">
+            <label>Mês / Ano</label>
+            <input id="mesano" type="month" oninput="render()">
+          </div>
+          <div class="fg">
+            <label>Corretor / Consultor</label>
+            <input id="consultor" type="text" placeholder="Seu nome" oninput="render()">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Logo da Corretora -->
+      <div class="fsec">
+        <div class="stitle"><span>🏷️</span> Logo da Corretora</div>
+        <div class="logo-box" id="logo-box" onclick="document.getElementById('logo-input').click()">
+          <div id="logo-preview-wrap">
+            <div class="ph">📤 Carregar logo (PNG · JPG · SVG)</div>
+            <div class="ph" style="font-size:10px;margin-top:4px">Aparece na capa e contracapa</div>
+          </div>
+        </div>
+        <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogo(this.files[0])">
+        <div id="logo-remove-wrap" style="display:none">
+          <button onclick="removeLogo()" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:11px;color:var(--muted);font-family:inherit">✕ Remover logo</button>
+        </div>
+      </div>
+
+      <!-- 3. Plano Atual -->
+      <div class="fsec">
+        <div class="stitle"><span>📋</span> Plano Atual do Cliente</div>
+        <div class="row2">
+          <div class="fg">
+            <label>Operadora</label>
+            <div class="ins-wrap">
+              <div class="ins-dot" id="dot-atual" style="background:#6B6B8A"></div>
+              <select id="a-seg" onchange="syncDotAtual(); syncAtualPlanOpts(); render()">
+                <option value="sulamerica">SulAmérica</option>
+                <option value="amil">Amil</option>
+                <option value="portoseguro">Porto Seguro</option>
+                <option value="hapvida">Hapvida</option>
+                <option value="bradesco">Bradesco</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Nome do Plano</label>
+            <select id="a-plano" onchange="render()"></select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="fg">
+            <label>Nº de Vidas</label>
+            <input id="a-vidas" type="number" min="1" value="10" oninput="render()">
+          </div>
+          <div class="fg">
+            <label>Valor Mensal (R$)</label>
+            <input id="a-valor" type="number" min="0" step="0.01" placeholder="18500.00" oninput="render()">
+          </div>
+        </div>
+        <div class="fg">
+          <label>Coparticipação</label>
+          <div class="cop-toggle">
+            <button class="cop-btn" id="cop-a-sim" onclick="setAtualCop(true)">✔ Com Coparticipação</button>
+            <button class="cop-btn active-nao" id="cop-a-nao" onclick="setAtualCop(false)">✕ Sem Coparticipação</button>
+          </div>
+        </div>
+        <div class="toggle-row" onclick="toggleAtualReemb()">
+          <input type="checkbox" id="rs-atual" onclick="event.stopPropagation();toggleAtualReemb()">
+          <label for="rs-atual">Informar reembolso por consulta</label>
+        </div>
+        <div id="a-reemb-container" style="display:none">
+          <div class="fg"><label>Reembolso por consulta (R$)</label><input id="a-reembolso" type="number" min="0" step="0.01" placeholder="200.00" oninput="render()"></div>
+        </div>
+      </div>
+
+      <!-- 4. Plano Bradesco -->
+      <div class="fsec">
+        <div class="stitle"><span>🏥</span> Plano Bradesco Saúde</div>
+        <div class="pdf-upload-box" onclick="document.getElementById('brad-pdf').click()">
+          <div class="pu-title">📄 Importar cotação SPG Bradesco (opcional)</div>
+          <div class="pu-hint">Preenche os campos automaticamente a partir do PDF</div>
+        </div>
+        <input type="file" id="brad-pdf" accept=".pdf" style="display:none" onchange="handleBradescoFile(this.files[0])">
+        <div id="brad-pdf-status"></div>
+        <div class="row2">
+          <div class="fg">
+            <label>Nome do Plano</label>
+            <select id="brad-plano" onchange="syncBradReembolso(); render()">
+              <option>Regional</option>
+              <option>Saúde +</option>
+              <option>Flex</option>
+              <option>Ideal</option>
+              <option selected>Efetivo</option>
+              <option>Efetivo Plus</option>
+              <option>Nacional</option>
+              <option>Nacional Plus</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Acomodação</label>
+            <select id="brad-acom" onchange="render()">
+              <option>Enfermaria</option>
+              <option selected>Apartamento</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="fg">
+            <label>Nº de Vidas</label>
+            <input id="brad-vidas" type="number" min="1" value="10" oninput="render()">
+          </div>
+          <div class="fg">
+            <label>Valor Mensal (R$)</label>
+            <input id="brad-valor" type="number" min="0" step="0.01" placeholder="15200.00" oninput="render()">
+          </div>
+        </div>
+        <div class="fg">
+          <label>Coparticipação Bradesco</label>
+          <div class="cop-toggle">
+            <button class="cop-btn active-sim" id="cop-b-sim" onclick="setBradCop(true)">✔ Com Coparticipação</button>
+            <button class="cop-btn" id="cop-b-nao" onclick="setBradCop(false)">✕ Sem Coparticipação</button>
+          </div>
+        </div>
+        <div class="toggle-row" onclick="toggleBradReemb()">
+          <input type="checkbox" id="rs-brad" onclick="event.stopPropagation();toggleBradReemb()">
+          <label for="rs-brad">Exibir reembolso por consulta no documento</label>
+        </div>
+        <div id="brad-reemb-container" style="display:none">
+          <div class="fg"><label>Reembolso por consulta (R$)</label><input id="brad-reembolso" type="number" min="0" step="0.01" oninput="render()"></div>
+        </div>
+      </div>
+
+      <!-- 5. Slides opcionais -->
+      <div class="fsec">
+        <div class="stitle"><span>📑</span> Slides da Apresentação</div>
+        <div class="check-opt" onclick="toggleOpt('cop')">
+          <input type="checkbox" id="opt-cop" checked onclick="event.stopPropagation();toggleOpt('cop')">
+          <label for="opt-cop">Tabela de Coparticipação Bradesco</label>
+        </div>
+        <div class="check-opt" onclick="toggleOpt('wait')">
+          <input type="checkbox" id="opt-wait" checked onclick="event.stopPropagation();toggleOpt('wait')">
+          <label for="opt-wait">Tabela de Carências</label>
+        </div>
+        <div class="check-opt" onclick="toggleOpt('diff')">
+          <input type="checkbox" id="opt-diff" checked onclick="event.stopPropagation();toggleOpt('diff')">
+          <label for="opt-diff">Diferenciais Bradesco Saúde</label>
+        </div>
+      </div>
+
     </div>
-  </div>
-
-  <div class="upload-card" id="drop-zone">
-    <div class="upload-icon">📄</div>
-    <div class="upload-title">Suba a cotação da Bradesco</div>
-    <div class="upload-sub">Arraste o PDF do Emissão Expressa SPG ou clique para selecionar.<br>A apresentação é gerada automaticamente.</div>
-    <button class="upload-btn" onclick="document.getElementById('file-input').click()">Selecionar PDF</button>
-    <div class="upload-hint">Apenas arquivos PDF do sistema SPG Bradesco Saúde</div>
-    <input type="file" id="file-input" accept=".pdf">
-  </div>
-
-  <div id="loading">
-    <div class="spinner"></div>
-    <div style="font-size:14px;color:var(--muted);font-weight:600">Lendo cotação e montando apresentação...</div>
-  </div>
-</div>
-
-<!-- ── PRESENTATION ── -->
-<div id="presentation">
-  <div class="print-bar">
-    <div class="print-bar-brand">🏥 Bradesco Saúde · Apresentação</div>
-    <div class="print-bar-actions">
-      <button class="btn-outline" onclick="resetApp()">← Nova cotação</button>
-      <button class="btn-primary" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <div class="sidebar-footer">
+      <button class="gen-btn" onclick="render()">🔄 Atualizar Preview</button>
     </div>
-  </div>
-  <div class="slides" id="slides-container"></div>
+  </aside>
+
+  <!-- ══ PREVIEW ══ -->
+  <main class="preview">
+    <div class="preview-bar">
+      <span>📄 Preview da apresentação</span>
+      <button class="pdf-btn" id="pdf-btn" onclick="gerarPDF()">⬇ Baixar PDF</button>
+    </div>
+    <div id="doc-wrap" class="slides-wrap">
+      <div class="empty"><div class="icon">🏥</div><p>Preencha os dados e a apresentação aparece aqui</p></div>
+    </div>
+  </main>
+
 </div>
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// ── UPLOAD / DRAG DROP ──
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
+/* ═══════════ CONSTANTS ═══════════ */
+const INS = {
+  bradesco:    { label: 'Bradesco',     color: '#CC0000' },
+  sulamerica:  { label: 'SulAmérica',   color: '#E8661A' },
+  amil:        { label: 'Amil',         color: '#3B2F9E' },
+  portoseguro: { label: 'Porto Seguro', color: '#005FAF' },
+  hapvida:     { label: 'Hapvida',      color: '#00873D' },
+  outro:       { label: 'Outro',        color: '#888888' },
+};
 
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+const PLANS = {
+  bradesco:    ['Regional','Saúde +','Efetivo','Efetivo Plus','Flex','Ideal','Nacional','Nacional Plus'],
+  sulamerica:  ['Direto Nacional E','Direto Nacional Q','Exato E','Exato Q','Clássico Vital E','Clássico Vital Q','Clássico 100 E','Especial 100 Q','Especial Mais','Executivo','Prestige'],
+  amil:        ['Bronze SP','Bronze Mais','Prata','Ouro','Ouro II','Platinum R1','Platinum R2','S380 E','S380 Q','S450 E','S450 Q','S750 R1','S750 R2','S750 R3','Black I','S2500','Black II','S6500 Black'],
+  portoseguro: ['Pró ABCDM','Prata Pró E','Prata Pró Q','Ouro Pró','Diamante Pró','Bronze Brasil E','Bronze Brasil Q','Prata Mais E','Prata Mais Q','Ouro Mais','Ouro Max','Diamante Mais'],
+  hapvida:     ['200 ABC','200 UP','300 E','500 E','500 Q','600 E','600 Q','700 E','700 Q'],
+  outro:       [],
+};
 
-function resetApp() {
-  document.getElementById('upload-screen').style.display = 'flex';
-  document.getElementById('presentation').style.display = 'none';
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('drop-zone').style.display = '';
-  fileInput.value = '';
+const BRAD_COP = {
+  subtitulo: 'Limite máximo em reais por utilização · Contratos de 3 a 199 vidas',
+  procedimentos: ['Atendimento em P.S.','Consulta eletiva','Exames Especiais (Tipo B)','Exames Simples (Tipo A)','Procedimentos Ambulatoriais','Procedimentos Seriados','Internação'],
+  planos: {
+    'Regional':      ['R$ 90,00','R$ 35,00','R$ 120,00','R$ 45,00','R$ 135,00','R$ 50,00','R$ 250,00'],
+    'Saúde +':       ['R$ 90,00','R$ 35,00','R$ 120,00','R$ 45,00','R$ 135,00','R$ 50,00','R$ 250,00'],
+    'Efetivo':       ['R$ 90,00','R$ 35,00','R$ 120,00','R$ 45,00','R$ 135,00','R$ 50,00','R$ 250,00'],
+    'Efetivo Plus':  ['R$ 120,00','R$ 45,00','R$ 160,00','R$ 60,00','R$ 150,00','R$ 55,00','R$ 300,00'],
+    'Flex':          ['R$ 115,00','R$ 40,00','R$ 135,00','R$ 55,00','R$ 150,00','R$ 55,00','R$ 300,00'],
+    'Ideal':         ['R$ 120,00','R$ 45,00','R$ 160,00','R$ 60,00','R$ 150,00','R$ 55,00','R$ 300,00'],
+    'Nacional':      ['R$ 130,00','R$ 70,00','R$ 160,00','R$ 65,00','R$ 180,00','R$ 65,00','R$ 500,00'],
+    'Nacional Plus': ['R$ 320,00','R$ 160,00','R$ 320,00','R$ 160,00','R$ 320,00','R$ 160,00','R$ 550,00'],
+  }
+};
+
+const BRAD_REEMBOLSO = {
+  'Regional': 109.76, 'Saúde +': 109.76, 'Flex': 109.76, 'Ideal': 109.76,
+  'Efetivo': 109.76, 'Efetivo Plus': 109.76,
+  'Nacional': [109.76, 219.52, 329.27],
+  'Nacional Plus': [439.03, 658.55, 878.06],
+};
+
+const BRAD_CARENCIAS = [
+  { proc: 'Urgência e Emergência', icon: '🚨', sem: 'Sem carência', com: 'Sem carência', level: 'zero' },
+  { proc: 'Consultas eletivas',     icon: '🩺', sem: 'Sem carência', com: 'Sem carência', level: 'zero' },
+  { proc: 'Exames Simples (Tipo A)',icon: '🔬', sem: '30 dias',       com: 'Sem carência', level: 'low'  },
+  { proc: 'Exames Especiais (Tipo B)',icon:'🧪',sem: '60 dias',       com: '30 dias',       level: 'low'  },
+  { proc: 'Internações e Cirurgias',icon: '🏥', sem: '180 dias',      com: '90 dias',       level: 'mid'  },
+  { proc: 'Parto',                  icon: '👶', sem: '300 dias',      com: '150 dias',      level: 'mid'  },
+  { proc: 'Doenças Preexistentes (LCA)', icon: '📋', sem: '24 meses', com: '12 meses',     level: 'mid'  },
+];
+
+const BRAD_DIFFS = [
+  { icon: '📱', title: 'Meu Doutor', desc: 'Telemedicina 24h por dia, 7 dias por semana, sem custo adicional. Clínico geral e especialistas.' },
+  { icon: '🏋️', title: 'Clube+ Saúde', desc: 'Academias, nutricionistas e psicólogos com condições especiais. Mais de 3.000 parceiros no Brasil.' },
+  { icon: '💊', title: 'Desconto Farmácia', desc: 'Até 40% de desconto em medicamentos nas redes parceiras Bradesco Saúde.' },
+  { icon: '🌎', title: 'Maior Rede Nacional', desc: 'Mais de 42.000 prestadores credenciados — a maior rede de saúde privada do país.' },
+  { icon: '📲', title: 'Bradesco Saúde App', desc: 'Autorize procedimentos, gere 2ª via de carteirinha e acesse a rede credenciada pelo celular.' },
+  { icon: '💰', title: 'Reembolso', desc: 'Flexibilidade para consultar qualquer médico fora da rede com reembolso parcial garantido.' },
+];
+
+/* ═══════════ STATE ═══════════ */
+let state = {
+  logoUrl: null,
+  copAtual: false,
+  copBrad: true,
+  atualReembShow: false,
+  bradReembShow: false,
+  showCop: true,
+  showWait: true,
+  showDiff: true,
+};
+let charts = [];
+let renderGen = 0;
+
+/* ═══════════ INIT ═══════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  document.getElementById('mesano').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  syncAtualPlanOpts();
+  render();
+});
+
+/* ═══════════ LOGO ═══════════ */
+function handleLogo(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.logoUrl = e.target.result;
+    const wrap = document.getElementById('logo-preview-wrap');
+    wrap.innerHTML = `<img src="${state.logoUrl}" style="max-height:50px;max-width:180px;object-fit:contain">`;
+    document.getElementById('logo-remove-wrap').style.display = '';
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+function removeLogo() {
+  state.logoUrl = null;
+  document.getElementById('logo-preview-wrap').innerHTML = '<div class="ph">📤 Carregar logo (PNG · JPG · SVG)</div><div class="ph" style="font-size:10px;margin-top:4px">Aparece na capa e contracapa</div>';
+  document.getElementById('logo-remove-wrap').style.display = 'none';
+  document.getElementById('logo-input').value = '';
+  render();
 }
 
-async function handleFile(file) {
-  if (!file || !file.name.endsWith('.pdf')) return alert('Por favor, selecione um arquivo PDF.');
-  document.getElementById('drop-zone').style.display = 'none';
-  document.getElementById('loading').style.display = 'flex';
-  try {
-    const data = await parsePDF(file);
-    renderPresentation(data);
-  } catch(err) {
-    console.error(err);
-    alert('Erro ao processar o PDF. Verifique se é uma cotação do Emissão Expressa SPG.');
-    resetApp();
-  }
+/* ═══════════ INS DOT ═══════════ */
+function syncDotAtual() {
+  const seg = document.getElementById('a-seg')?.value || 'outro';
+  document.getElementById('dot-atual').style.background = (INS[seg] || INS.outro).color;
+}
+function syncAtualPlanOpts() {
+  const seg = document.getElementById('a-seg')?.value || 'sulamerica';
+  const sel = document.getElementById('a-plano');
+  if (!sel) return;
+  const opts = PLANS[seg] || [];
+  sel.innerHTML = opts.length
+    ? opts.map(p => `<option>${p}</option>`).join('')
+    : '<option value="">— livre —</option>';
+  syncDotAtual();
 }
 
-// ── PDF PARSER ──
-async function parsePDF(file) {
-  const ab = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-  const pages = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    // Sort items top-to-bottom, left-to-right
-    const items = content.items.slice().sort((a, b) => {
-      const dy = b.transform[5] - a.transform[5];
-      return Math.abs(dy) > 3 ? dy : a.transform[4] - b.transform[4];
-    });
-    // Group by lines
-    const lines = []; let cur = []; let lastY = null;
-    for (const it of items) {
-      const y = it.transform[5];
-      if (lastY === null || Math.abs(y - lastY) > 3) {
-        if (cur.length) lines.push(cur.map(x => x.str).join(' ').trim());
-        cur = [it]; lastY = y;
-      } else { cur.push(it); }
-    }
-    if (cur.length) lines.push(cur.map(x => x.str).join(' ').trim());
-    pages.push(lines.filter(Boolean));
-  }
-  return extractData(pages);
+/* ═══════════ COP TOGGLES ═══════════ */
+function setAtualCop(v) {
+  state.copAtual = v;
+  document.getElementById('cop-a-sim').className = 'cop-btn' + (v ? ' active-sim' : '');
+  document.getElementById('cop-a-nao').className = 'cop-btn' + (!v ? ' active-nao' : '');
+  render();
+}
+function setBradCop(v) {
+  state.copBrad = v;
+  document.getElementById('cop-b-sim').className = 'cop-btn' + (v ? ' active-sim' : '');
+  document.getElementById('cop-b-nao').className = 'cop-btn' + (!v ? ' active-nao' : '');
+  render();
 }
 
-function extractData(pages) {
-  const all = pages.flat();
-  const fullText = all.join('\n');
-
-  // Date
-  const dateM = fullText.match(/(\d{2}\/\d{2}\/\d{4})/);
-  const date = dateM ? dateM[1] : '';
-
-  // CNPJ + company
-  const cnpjM = fullText.match(/(\d{2}[\.\d]+\/\d{4}-\d{2})/);
-  const cnpj = cnpjM ? cnpjM[1] : '';
-  let company = '';
-  if (cnpjM) {
-    const idx = all.findIndex(l => l.includes(cnpjM[1]));
-    if (idx >= 0) {
-      const line = all[idx].replace(cnpjM[1], '').trim();
-      company = line || (all[idx+1] || '');
-      // Remove CNPJ number prefix like "54.220.151 "
-      company = company.replace(/^\d{2}\.\d{3}\.\d{3}\s+/, '').trim();
-    }
+/* ═══════════ REEMBOLSO TOGGLES ═══════════ */
+function toggleAtualReemb() {
+  state.atualReembShow = !state.atualReembShow;
+  document.getElementById('rs-atual').checked = state.atualReembShow;
+  document.getElementById('a-reemb-container').style.display = state.atualReembShow ? '' : 'none';
+  render();
+}
+function toggleBradReemb() {
+  state.bradReembShow = !state.bradReembShow;
+  document.getElementById('rs-brad').checked = state.bradReembShow;
+  document.getElementById('brad-reemb-container').style.display = state.bradReembShow ? '' : 'none';
+  if (state.bradReembShow) syncBradReembolso();
+  render();
+}
+function syncBradReembolso() {
+  if (!state.bradReembShow) return;
+  const plano = document.getElementById('brad-plano')?.value || 'Efetivo';
+  const val = BRAD_REEMBOLSO[plano];
+  const input = document.getElementById('brad-reembolso');
+  if (!input) return;
+  if (Array.isArray(val)) {
+    input.value = val[0].toFixed(2);
+  } else if (val) {
+    input.value = val.toFixed(2);
   }
+  render();
+}
 
-  // Group name
-  const groupM = fullText.match(/GRUPO\s+\d+:\s*(.+)/i);
-  const groupName = groupM ? groupM[1].split('Pessoas')[0].trim() : 'Beneficiários';
+/* ═══════════ SLIDE OPTIONS ═══════════ */
+function toggleOpt(key) {
+  const map = { cop: 'showCop', wait: 'showWait', diff: 'showDiff' };
+  state[map[key]] = !state[map[key]];
+  document.getElementById(`opt-${key}`).checked = state[map[key]];
+  render();
+}
 
-  // Total people
-  const peopleM = fullText.match(/(\d+)\s*pessoas/i);
-  const totalPeople = peopleM ? parseInt(peopleM[1]) : 0;
-
-  // Values
-  const parcM = fullText.match(/Demais parcelas[\s\S]{0,200}?R\$\s*([\d.,]+)/i);
-  const monthlyTotal = parcM ? parcM[1] : '';
-  const ioF = fullText.match(/I\.O\.F[\s\S]{0,50}?R\$\s*([\d.,]+)/i);
-  const iofVal = ioF ? ioF[1] : '0,00';
-
-  // Plan info (page 2)
-  const p2 = (pages[1] || []).join('\n');
-  const planM = p2.match(/Plano de Saúde[\s\S]{0,20}Benefícios[\s\S]{0,10}(\w[\w\s+]+?)(?:\n|Reembolso)/i);
-  let planName = planM ? planM[1].trim() : '';
-  if (!planName) {
-    // Try to find it from comparison table - the (Selecionado) marker
-    const selM = fullText.match(/Específico\s+([\w\s+]+?)\s+Não[\s\S]{0,200}?\(Selecionado\)/i);
-    if (selM) planName = selM[1].trim();
+/* ═══════════ COLLECT DATA ═══════════ */
+function getData() {
+  const mv = document.getElementById('mesano').value;
+  let label = '';
+  if (mv) {
+    const [y, m] = mv.split('-');
+    const M = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    label = `${M[+m-1]}/${y}`;
   }
-  if (!planName) planName = 'Efetivo';
-
-  // Accommodation
-  const acoM = p2.match(/(Quarto|Enfermaria)/i);
-  const accommodation = acoM ? acoM[1] : 'Quarto';
-
-  // Co-participation
-  const copM = p2.match(/Coparticipação\s+(Não|Sim|\d+%)/i);
-  const copValue = copM ? copM[1] : 'Não';
-
-  // Reimbursement
-  const rembM = fullText.match(/Reembolso Específico\s*R\$\s*([\d.,]+)/i);
-  const reembolso = rembM ? rembM[1] : '';
-
-  // Features
-  const hasMeuDoutor = /Programa Meu Doutor/i.test(p2);
-  const hasDescFarm   = /Desconto Farmácia/i.test(p2);
-  const hasClube      = /Clube\+\s*Saúde/i.test(p2);
-  const region        = (p2.match(/Região tarifária\s+(.+)/i) || [])[1] || 'São Paulo';
-
-  // Age brackets (page 2)
-  const ageBrackets = parseAgeBrackets(pages[1] || []);
-
-  // Plans comparison (page 3)
-  const plansComp = parsePlansComparison(pages[2] || [], planName);
-
-  // Waiting periods (page 4)
-  const waiting = parseWaiting(fullText);
-
   return {
-    date, cnpj, company, groupName, totalPeople,
-    monthlyTotal, iofVal, planName, accommodation,
-    copValue, reembolso, region,
-    hasMeuDoutor, hasDescFarm, hasClube,
-    ageBrackets, plansComp, waiting
+    empresa:   document.getElementById('empresa').value.trim() || 'Nome da Empresa',
+    mesano:    label || 'Mês/Ano',
+    consultor: document.getElementById('consultor').value.trim(),
+    logoUrl:   state.logoUrl,
+    atual: {
+      seg:      document.getElementById('a-seg')?.value || 'sulamerica',
+      plano:    document.getElementById('a-plano')?.value || '—',
+      vidas:    parseInt(document.getElementById('a-vidas')?.value) || 1,
+      valor:    parseFloat(document.getElementById('a-valor')?.value) || 0,
+      cop:      state.copAtual,
+      reembolso: state.atualReembShow ? (parseFloat(document.getElementById('a-reembolso')?.value) || 0) : 0,
+    },
+    brad: {
+      plano:    document.getElementById('brad-plano')?.value || 'Efetivo',
+      acom:     document.getElementById('brad-acom')?.value || 'Apartamento',
+      vidas:    parseInt(document.getElementById('brad-vidas')?.value) || 1,
+      valor:    parseFloat(document.getElementById('brad-valor')?.value) || 0,
+      cop:      state.copBrad,
+      reembolso: state.bradReembShow ? (parseFloat(document.getElementById('brad-reembolso')?.value) || 0) : 0,
+    },
+    showCop:  state.showCop,
+    showWait: state.showWait,
+    showDiff: state.showDiff,
   };
 }
 
-function parseAgeBrackets(lines) {
-  const text = lines.join('\n');
-  const faixas = ['0 - 18','19 - 23','24 - 28','29 - 33','34 - 38','39 - 43','44 - 48','49 - 53','54 - 58','59+'];
+/* ═══════════ RENDER ═══════════ */
+function render() {
+  charts.forEach(c => { try { c.destroy(); } catch(_){} });
+  charts = [];
+  const d = getData();
+  const wrap = document.getElementById('doc-wrap');
+  let html = buildCover(d) + buildComp(d);
+  if (d.showCop && d.brad.cop) html += buildCopSlide(d);
+  if (d.showWait) html += buildCarenciaSlide(d);
+  if (d.showDiff) html += buildDiffSlide(d);
+  html += buildBackCover(d);
+  wrap.innerHTML = html;
+  applyZoom();
+  const gen = ++renderGen;
+  setTimeout(() => { if (gen === renderGen) drawCharts(d); }, 60);
+}
 
-  // Find the saude values line
-  const saudeIdx = lines.findIndex(l => /^Saúde\s+R\$/i.test(l.trim()) || l.includes('R$') && lines[lines.indexOf(l)-1]?.includes('Faixa'));
-  const pessoasIdx = lines.findIndex(l => /^Pessoas\s+\d/i.test(l.trim()) || (l.match(/^Pessoas/) && l.match(/\d/)));
-  const subtotalIdx = lines.findIndex(l => /^Subtotal/i.test(l.trim()));
+function applyZoom() {
+  const area = document.querySelector('.preview');
+  if (!area) return;
+  const st = getComputedStyle(area);
+  const hPad = parseFloat(st.paddingLeft) + parseFloat(st.paddingRight);
+  const avail = area.clientWidth - hPad;
+  const z = Math.min(1, avail / 960);
+  document.querySelectorAll('.slide-box').forEach(el => el.style.zoom = z);
+}
+window.addEventListener('resize', applyZoom);
 
-  // Extract currency values from a line
-  const extractVals = (line) => {
-    const matches = [...line.matchAll(/R\$\s*([\d.,]+)/g)];
-    return matches.map(m => m[1]);
+/* ═══════════ SLIDE: CAPA ═══════════ */
+function buildCover(d) {
+  const logoHtml = d.logoUrl
+    ? `<img src="${d.logoUrl}" style="max-height:48px;max-width:190px;object-fit:contain">`
+    : `<div class="logo-placeholder">CORRETORA</div>`;
+  return `
+  <div class="slide-box" id="sl-cover">
+    <div class="s-cover">
+      <div class="bg-geo1"></div><div class="bg-geo2"></div><div class="bg-lines"></div>
+      <div class="logo-area">${logoHtml}</div>
+      <div class="brad-badge">
+        <div class="b1">Bradesco Saúde</div>
+        <div class="b2">Canal Rede · Proposta Exclusiva</div>
+      </div>
+      <div class="tag">Plano de Saúde Empresarial</div>
+      <div class="title">Proposta<br><strong>Bradesco</strong></div>
+      <div class="company">${esc(d.empresa)}</div>
+      <div class="date">${esc(d.mesano)}${d.consultor ? ' · ' + esc(d.consultor) : ''} · ${d.brad.vidas} vida${d.brad.vidas !== 1 ? 's' : ''}</div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════ SLIDE: COMPARAÇÃO ═══════════ */
+function buildComp(d) {
+  const atualIns = INS[d.atual.seg] || INS.outro;
+  const ganhoMensal = d.atual.valor - d.brad.valor;
+  const ganhoAnual  = ganhoMensal * 12;
+  const ganhoClass  = ganhoAnual > 200 ? 'positivo' : ganhoAnual < -200 ? 'negativo' : 'neutro';
+  const ganhoIcon   = ganhoAnual > 200 ? '▼' : ganhoAnual < -200 ? '▲' : '≈';
+  const ganhoLabel  = ganhoAnual > 200 ? 'Economia anual' : ganhoAnual < -200 ? 'Investimento adicional' : 'Valores equivalentes';
+  const atualPC = d.atual.valor > 0 && d.atual.vidas > 0 ? fmt(d.atual.valor / d.atual.vidas) : '—';
+  const bradPC  = d.brad.valor  > 0 && d.brad.vidas  > 0 ? fmt(d.brad.valor  / d.brad.vidas)  : '—';
+  const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
+  return `
+  <div class="slide-box" id="sl-comp">
+    <div class="s-comp">
+      ${logoWm}
+      <div class="s-title">Por que migrar para a <em>Bradesco Saúde?</em></div>
+      <div class="comp-grid">
+        <div class="comp-col atual">
+          <div class="col-label">Plano Atual</div>
+          <div style="text-align:center;margin-bottom:8px">
+            <span class="ins-tag" style="border-color:${atualIns.color};color:${atualIns.color}">${atualIns.label}</span>
+          </div>
+          <div class="chart-wrap"><canvas id="ch-atual"></canvas></div>
+          <div class="plan-meta">
+            <span class="plan-name-label" style="color:${atualIns.color}">${esc(d.atual.plano)}</span>
+            <span class="cop-chip ${d.atual.cop ? 'sim' : 'nao'}">${d.atual.cop ? 'Com Coparticipação' : 'Sem Coparticipação'}</span>
+            <span class="vidas-chip">${d.atual.vidas} vida${d.atual.vidas !== 1 ? 's' : ''} · ${atualPC}/capita</span>
+            ${d.atual.reembolso ? `<span class="reembolso-chip">↩ Reembolso ${fmt(d.atual.reembolso)}</span>` : ''}
+          </div>
+        </div>
+        <div class="vert-sep"></div>
+        <div class="comp-col brad">
+          <div class="col-label" style="color:var(--red)">Bradesco Saúde</div>
+          <div style="text-align:center;margin-bottom:8px">
+            <span class="ins-tag" style="border-color:var(--red);color:var(--red)">Bradesco</span>
+          </div>
+          <div class="chart-wrap"><canvas id="ch-brad"></canvas></div>
+          <div class="plan-meta">
+            <span class="plan-name-label" style="color:var(--red)">${esc(d.brad.plano)} ${esc(d.brad.acom)}</span>
+            <span class="cop-chip ${d.brad.cop ? 'sim' : 'nao'}">${d.brad.cop ? 'Com Coparticipação' : 'Sem Coparticipação'}</span>
+            <span class="vidas-chip">${d.brad.vidas} vida${d.brad.vidas !== 1 ? 's' : ''} · ${bradPC}/capita</span>
+            ${d.brad.reembolso ? `<span class="reembolso-chip">↩ Reembolso ${fmt(d.brad.reembolso)}</span>` : ''}
+            ${(d.atual.valor > 0 && d.brad.valor > 0) ? `
+            <span class="ganho-chip ${ganhoClass}" style="margin-top:6px">${ganhoIcon} ${ganhoLabel}: ${fmt(Math.abs(ganhoAnual))}</span>
+            <span class="ganho-label">por ano (${d.brad.vidas} vidas)</span>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="legend-row">
+        <div class="leg-item"><div class="leg-dot" style="background:${atualIns.color}"></div>${atualIns.label} — Plano atual</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Bradesco Saúde — Plano proposto</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════ SLIDE: COPARTICIPAÇÃO ═══════════ */
+function buildCopSlide(d) {
+  const planoKey = d.brad.plano;
+  const vals = BRAD_COP.planos[planoKey] || BRAD_COP.planos['Efetivo'];
+  const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
+  const thSt = `padding:10px 12px;text-align:center;font-size:10px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.6px`;
+  const tdPr = `padding:9px 12px;font-size:11px;color:var(--text);border-bottom:1px solid #f0f0f5;white-space:nowrap`;
+  const tdVl = `padding:9px 12px;font-size:12px;font-weight:800;color:var(--red);text-align:center;border-bottom:1px solid #f0f0f5;border-left:1px solid #f0f0f5`;
+  const rows = BRAD_COP.procedimentos.map((p, i) => `<tr><td style="${tdPr}">${p}</td><td style="${tdVl}">${vals[i] || '—'}</td></tr>`).join('');
+  return `
+  <div class="slide-box" id="sl-cop">
+    <div class="s-cop">
+      ${logoWm}
+      <div class="slide-sec-head">
+        <div class="slide-sec-bar" style="background:var(--red);height:44px"></div>
+        <div>
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:var(--red)">Bradesco Saúde</div>
+          <div class="slide-sec-title">Coparticipação — ${esc(d.brad.plano)} ${esc(d.brad.acom)}</div>
+          <div class="slide-sec-sub">${BRAD_COP.subtitulo}</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;border-radius:10px;overflow:hidden;margin-top:20px">
+        <thead>
+          <tr style="background:var(--red)">
+            <th style="${thSt};text-align:left">Procedimento</th>
+            <th style="${thSt}">${esc(d.brad.plano)}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      ${!d.atual.cop ? `
+      <div style="margin-top:20px;padding:14px 16px;background:#f0fdf4;border-radius:10px;border:1.5px solid #16a34a;font-size:12px;color:#15803d;font-weight:600">
+        ✅ <strong>Ponto de atenção:</strong> O plano atual <em>não possui coparticipação</em>.
+        Os limites acima representam o custo máximo que o beneficiário pagará por utilização no plano Bradesco.
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
+/* ═══════════ SLIDE: CARÊNCIAS ═══════════ */
+function buildCarenciaSlide(d) {
+  const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
+  const items = BRAD_CARENCIAS.map(c => `
+    <div class="wait-item">
+      <div class="wait-icon">${c.icon}</div>
+      <div>
+        <div class="wait-name">${c.proc}</div>
+        <div style="margin-top:4px">
+          <span class="wait-tag ${c.level}">Sem aproveitamento: ${c.sem}</span>
+          <span class="wait-tag low">Com aproveitamento: ${c.com}</span>
+        </div>
+      </div>
+    </div>`).join('');
+  return `
+  <div class="slide-box" id="sl-wait">
+    <div class="s-wait">
+      ${logoWm}
+      <div class="slide-sec-head">
+        <div class="slide-sec-bar" style="background:var(--red);height:44px"></div>
+        <div>
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:var(--red)">Bradesco Saúde</div>
+          <div class="slide-sec-title">Carências do Plano</div>
+          <div class="slide-sec-sub">Grupos de 3 a 9 vidas — Sem portabilidade/aproveitamento de carência</div>
+        </div>
+      </div>
+      <div class="wait-grid">${items}</div>
+      <div style="margin-top:14px;padding:10px 14px;background:#fff8f8;border-radius:8px;font-size:10px;color:var(--muted)">
+        💡 <strong>Com aproveitamento de carência:</strong> Quando o beneficiário migra de outro plano regulamentado pela ANS, é possível aproveitar o período já cumprido — reduzindo significativamente os prazos acima.
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════ SLIDE: DIFERENCIAIS ═══════════ */
+function buildDiffSlide(d) {
+  const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
+  const items = BRAD_DIFFS.map(df => `
+    <div class="diff-item">
+      <div class="diff-icon">${df.icon}</div>
+      <div class="diff-title">${df.title}</div>
+      <div class="diff-desc">${df.desc}</div>
+    </div>`).join('');
+  return `
+  <div class="slide-box" id="sl-diff">
+    <div class="s-diff">
+      ${logoWm}
+      <div class="slide-sec-head">
+        <div class="slide-sec-bar" style="background:var(--red);height:44px"></div>
+        <div>
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:var(--red)">Bradesco Saúde</div>
+          <div class="slide-sec-title">Por que Bradesco Saúde?</div>
+          <div class="slide-sec-sub">Benefícios exclusivos para os seus colaboradores</div>
+        </div>
+      </div>
+      <div class="diff-grid">${items}</div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════ SLIDE: CONTRACAPA ═══════════ */
+function buildBackCover(d) {
+  const logoHtml = d.logoUrl
+    ? `<img src="${d.logoUrl}" style="max-height:52px;max-width:200px;object-fit:contain;filter:brightness(0) invert(1)">`
+    : `<div style="background:rgba(255,255,255,.15);border-radius:10px;padding:12px 24px;font-size:15px;font-weight:800;color:rgba(255,255,255,.8);letter-spacing:1.5px">CORRETORA</div>`;
+  return `
+  <div class="slide-box" id="sl-back">
+    <div class="s-back">
+      <div class="bg-geo"></div>
+      <div style="display:flex;align-items:center;gap:48px;z-index:1">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          ${logoHtml}
+          <div style="font-size:9px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:2px">Corretor autorizado</div>
+        </div>
+        <div style="width:1px;height:100px;background:rgba(255,255,255,.25)"></div>
+        <div>
+          <div style="font-size:11px;font-weight:900;color:rgba(255,255,255,.95);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">Bradesco Saúde</div>
+          <div style="font-size:24px;font-weight:300;color:#fff;line-height:1.3">Pronto para<br><strong>contratar?</strong></div>
+          <div style="margin-top:14px;font-size:11px;color:rgba(255,255,255,.6)">Entre em contato com seu corretor Bradesco Saúde</div>
+          ${d.consultor ? `<div style="margin-top:4px;font-size:12px;font-weight:700;color:rgba(255,255,255,.85)">${esc(d.consultor)}</div>` : ''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════ CHARTS ═══════════ */
+function drawCharts(d) {
+  const allVals = [d.atual.valor, d.brad.valor].filter(v => v > 0);
+  if (!allVals.length) return;
+  const maxV = Math.max(...allVals);
+  const yMax = Math.ceil(maxV * 1.35 / 500) * 500;
+  const atualColor = (INS[d.atual.seg] || INS.outro).color;
+
+  const baseOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    animation: { duration: 250 },
+    layout: { padding: { top: 28 } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false }, ticks: { display: false } },
+      y: {
+        min: 0, max: yMax, border: { display: false },
+        grid: { color: '#F0F0F5' },
+        ticks: {
+          callback: v => 'R$' + (v >= 1000 ? (v/1000).toLocaleString('pt-BR', {maximumFractionDigits:0}) + 'k' : v),
+          font: { size: 9 }, color: '#9999AA', maxTicksLimit: 6,
+        },
+      },
+    },
   };
-  const extractNums = (line) => {
-    const matches = [...line.matchAll(/\b(\d+)\b/g)];
-    return matches.map(m => m[1]);
+
+  const labelPlugin = {
+    id: 'lbl',
+    afterDraw(chart) {
+      const ctx = chart.ctx;
+      chart.data.datasets.forEach((ds, di) => {
+        chart.getDatasetMeta(di).data.forEach((bar, i) => {
+          const v = ds.data[i]; if (!v || bar.height < 20) return;
+          ctx.save();
+          ctx.font = 'bold 11px "Open Sans", sans-serif';
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(fmt(v), bar.x, bar.y + bar.height / 2);
+          ctx.restore();
+        });
+      });
+    },
   };
 
-  let saudeVals = [], pessoasVals = [], subVals = [];
+  const ca = document.getElementById('ch-atual');
+  if (ca) charts.push(new Chart(ca, {
+    type: 'bar',
+    data: { labels: [''], datasets: [{ data: [d.atual.valor], backgroundColor: atualColor + 'DD', borderRadius: 8, borderSkipped: false }] },
+    options: baseOpts, plugins: [labelPlugin],
+  }));
 
-  if (saudeIdx >= 0)   saudeVals   = extractVals(lines[saudeIdx]);
-  if (pessoasIdx >= 0) pessoasVals = extractNums(lines[pessoasIdx].replace(/^Pessoas\s*/i,''));
-  if (subtotalIdx >= 0) subVals    = lines[subtotalIdx];
-
-  // Build bracket rows
-  return faixas.map((f, i) => ({
-    faixa: f,
-    valor: saudeVals[i] || '—',
-    pessoas: pessoasVals[i] || '0',
-    subtotal: saudeVals[i] && pessoasVals[i] && pessoasVals[i] !== '0'
-      ? 'R$ ' + (parseFloat(saudeVals[i].replace(/\./g,'').replace(',','.')) * parseInt(pessoasVals[i])).toLocaleString('pt-BR', {minimumFractionDigits:2})
-      : '—'
+  const cb = document.getElementById('ch-brad');
+  if (cb) charts.push(new Chart(cb, {
+    type: 'bar',
+    data: { labels: [''], datasets: [{ data: [d.brad.valor], backgroundColor: '#CC0000DD', borderRadius: 8, borderSkipped: false }] },
+    options: baseOpts, plugins: [labelPlugin],
   }));
 }
 
-function parsePlansComparison(lines, selectedPlan) {
-  // Find lines that contain plan data (Específico + plan name + values)
-  const plans = [];
-  const planPattern = /Específico\s+([\w\s+]+?)\s+(Não|Sim|\d+%)\s+(Consulta|[\w\s]+?)\s+R\$\s*([\d.,]+)\s+R\$\s*([\d.,]+)/i;
+/* ═══════════ PDF EXPORT ═══════════ */
+async function gerarPDF() {
+  const btn = document.getElementById('pdf-btn');
+  btn.disabled = true; btn.textContent = '⏳ Gerando PDF...';
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [297, 167] });
+    const d = getData();
+    const ids = ['sl-cover','sl-comp'];
+    if (d.showCop && d.brad.cop) ids.push('sl-cop');
+    if (d.showWait) ids.push('sl-wait');
+    if (d.showDiff) ids.push('sl-diff');
+    ids.push('sl-back');
 
-  for (const line of lines) {
-    const m = line.match(planPattern);
-    if (m) {
-      plans.push({
-        name: m[1].trim(),
-        copart: m[2].trim(),
-        reembolso: m[5].trim(),
-        valor: m[4].trim(),
-        isSelected: line.includes('Selecionado') || m[1].trim().toLowerCase() === selectedPlan.toLowerCase()
+    for (const [idx, sid] of ids.entries()) {
+      const el = document.getElementById(sid);
+      if (!el) continue;
+      const prevZoom = el.style.zoom;
+      el.style.zoom = 1;
+      const isWhite = !['sl-cover','sl-back'].includes(sid);
+      const canvas = await html2canvas(el.firstElementChild, {
+        scale: 2, useCORS: true, logging: false,
+        backgroundColor: isWhite ? '#ffffff' : null,
+        width: 960, height: el.firstElementChild.offsetHeight,
       });
+      el.style.zoom = prevZoom;
+      const img = canvas.toDataURL('image/jpeg', 0.94);
+      if (idx > 0) pdf.addPage();
+      pdf.addImage(img, 'JPEG', 0, 0, 297, 167);
+    }
+
+    const name = `bradesco_${d.empresa.replace(/[^\w]/g,'_').slice(0,25)}_${d.mesano.replace('/','_')}.pdf`;
+    pdf.save(name);
+  } catch(e) { alert('Erro ao gerar PDF: ' + e.message); }
+  btn.disabled = false; btn.innerHTML = '⬇ Baixar PDF';
+}
+
+/* ═══════════ PDF PARSER (SPG Bradesco) ═══════════ */
+async function handleBradescoFile(file) {
+  if (!file) return;
+  const status = document.getElementById('brad-pdf-status');
+  status.textContent = '⏳ Lendo PDF...';
+  try {
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const items = content.items.slice().sort((a, b) => {
+        const dy = b.transform[5] - a.transform[5];
+        return Math.abs(dy) > 3 ? dy : a.transform[4] - b.transform[4];
+      });
+      const lines = []; let cur = []; let lastY = null;
+      for (const it of items) {
+        const y = it.transform[5];
+        if (lastY === null || Math.abs(y - lastY) > 3) {
+          if (cur.length) lines.push(cur.map(x => x.str).join(' ').trim());
+          cur = [it]; lastY = y;
+        } else { cur.push(it); }
+      }
+      if (cur.length) lines.push(cur.map(x => x.str).join(' ').trim());
+      pages.push(lines.filter(Boolean));
+    }
+    autofillFromPDF(pages);
+    status.textContent = '✅ PDF importado com sucesso!';
+    setTimeout(() => { status.textContent = ''; }, 4000);
+  } catch(e) {
+    status.textContent = '❌ Erro ao ler PDF. Verifique se é uma cotação SPG.';
+    console.error(e);
+  }
+  document.getElementById('brad-pdf').value = '';
+}
+
+function autofillFromPDF(pages) {
+  const all = pages.flat();
+  const fullText = all.join('\n');
+
+  // Company name
+  const cnpjM = fullText.match(/(\d{2}[\.\d]+\/\d{4}-\d{2})/);
+  if (cnpjM) {
+    const idx = all.findIndex(l => l.includes(cnpjM[1]));
+    if (idx >= 0) {
+      let company = all[idx].replace(cnpjM[1],'').trim().replace(/^\d{2}\.\d{3}\.\d{3}\s+/,'').trim();
+      if (!company && all[idx+1]) company = all[idx+1].trim();
+      if (company) {
+        const empr = document.getElementById('empresa');
+        if (!empr.value) empr.value = company;
+      }
     }
   }
 
-  // If nothing parsed, try a different approach
-  if (plans.length === 0) {
-    const allText = lines.join(' ');
-    const matches = [...allText.matchAll(/Específico\s+([\w\s+]+?)\s+Não\s+Consulta\s+R\$\s*([\d.,]+)\s+R\$\s*([\d.,]+)/gi)];
-    for (const m of matches) {
-      plans.push({
-        name: m[1].trim(),
-        copart: 'Não',
-        reembolso: m[3].trim(),
-        valor: m[2].trim(),
-        isSelected: m[1].trim().toLowerCase().includes(selectedPlan.toLowerCase())
-      });
+  // Vidas
+  const vidasM = fullText.match(/(\d+)\s*pessoas/i);
+  if (vidasM) {
+    document.getElementById('brad-vidas').value = vidasM[1];
+    document.getElementById('a-vidas').value = vidasM[1];
+  }
+
+  // Plan name + accommodation
+  const p2 = (pages[1] || []).join('\n');
+  const acoM = p2.match(/(Quarto|Enfermaria)/i);
+  if (acoM) {
+    const acom = acoM[1].toLowerCase() === 'quarto' ? 'Apartamento' : 'Enfermaria';
+    document.getElementById('brad-acom').value = acom;
+  }
+
+  // Detect plan family
+  const planFamilyM = fullText.match(/EFETIVO PLUS|EFETIVO|NACIONAL PLUS|NACIONAL|FLEX|IDEAL|REGIONAL|SAUDE\+/i);
+  if (planFamilyM) {
+    const raw = planFamilyM[0].toUpperCase();
+    const map = {
+      'EFETIVO PLUS': 'Efetivo Plus', 'EFETIVO': 'Efetivo',
+      'NACIONAL PLUS': 'Nacional Plus', 'NACIONAL': 'Nacional',
+      'FLEX': 'Flex', 'IDEAL': 'Ideal', 'REGIONAL': 'Regional', 'SAUDE+': 'Saúde +',
+    };
+    // Find longest match
+    const key = Object.keys(map).sort((a,b) => b.length - a.length).find(k => raw.includes(k));
+    if (key && map[key]) {
+      const sel = document.getElementById('brad-plano');
+      for (const opt of sel.options) {
+        if (opt.value === map[key]) { sel.value = map[key]; break; }
+      }
     }
   }
 
-  return plans;
-}
-
-function parseWaiting(text) {
-  const items = [
-    { proc: 'Urgência e emergência', icon: '🚨' },
-    { proc: 'Consultas', icon: '🩺' },
-    { proc: 'Exames do tipo A', icon: '🔬' },
-    { proc: 'Exames do tipo B', icon: '🧪' },
-    { proc: 'Internações clínicas', icon: '🏥' },
-    { proc: 'Cirurgias em geral', icon: '⚕️' },
-  ];
-  const result = [];
-  for (const item of items) {
-    const re = new RegExp(item.proc.replace(/[()]/g,'\\$&') + '[\\s\\S]{0,60}?(\\d+ horas|\\d+ dias|Isento)[\\s\\S]{0,60}?(\\d+ horas|\\d+ dias|Isento)', 'i');
-    const m = text.match(re);
-    result.push({ ...item, semAprov: m ? m[1] : '—', comAprov: m ? m[2] : '—' });
+  // Monthly total
+  const parcM = fullText.match(/Demais parcelas[\s\S]{0,200}?R\$\s*([\d.,]+)/i);
+  if (parcM) {
+    const valStr = parcM[1].replace(/\./g,'').replace(',','.');
+    document.getElementById('brad-valor').value = parseFloat(valStr).toFixed(2);
   }
-  return result;
+
+  // Copay
+  const copM = p2.match(/Coparticipação\s+(Não|Sim|\d+%)/i);
+  if (copM) {
+    const hasCop = copM[1].toLowerCase() !== 'não';
+    setBradCop(hasCop);
+  }
+
+  // Reembolso
+  const rembM = fullText.match(/Reembolso Específico\s*R\$\s*([\d.,]+)/i);
+  if (rembM) {
+    const valStr = rembM[1].replace(/\./g,'').replace(',','.');
+    state.bradReembShow = true;
+    document.getElementById('rs-brad').checked = true;
+    document.getElementById('brad-reemb-container').style.display = '';
+    document.getElementById('brad-reembolso').value = parseFloat(valStr).toFixed(2);
+  }
+
+  render();
 }
 
-// ── RENDERER ──
-function renderPresentation(d) {
-  document.getElementById('upload-screen').style.display = 'none';
-  document.getElementById('presentation').style.display = 'block';
-
-  const per = d.totalPeople > 0 && d.monthlyTotal
-    ? 'R$ ' + (parseFloat(d.monthlyTotal.replace(/\./g,'').replace(',','.')) / d.totalPeople).toLocaleString('pt-BR', {minimumFractionDigits:2})
-    : '—';
-
-  const container = document.getElementById('slides-container');
-  container.innerHTML = `
-
-    <!-- CAPA -->
-    <div class="slide">
-      <div class="slide-cover">
-        <div class="bradesco-logo-text">BRADESCO SAÚDE</div>
-        <div class="cover-tag">Proposta Exclusiva · Canal Rede</div>
-        <div class="cover-title">${d.company || 'Empresa'}</div>
-        <div class="cover-sub">Plano de Saúde Empresarial · ${d.groupName}</div>
-        <div class="cover-meta">
-          <div class="cover-meta-item"><label>Data</label><span>${d.date}</span></div>
-          <div class="cover-meta-item"><label>Vidas</label><span>${d.totalPeople}</span></div>
-          <div class="cover-meta-item"><label>Plano</label><span>Efetivo ${d.accommodation}</span></div>
-          <div class="cover-meta-item"><label>Região</label><span>${d.region}</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RESUMO -->
-    <div class="slide">
-      <div class="section-head">
-        <div class="section-icon">📊</div>
-        <div><div class="section-title">Resumo da Proposta</div><div class="section-sub">Principais números da cotação</div></div>
-      </div>
-      <div class="summary-grid">
-        <div class="summary-card">
-          <div class="s-label">Vidas protegidas</div>
-          <div class="s-value">${d.totalPeople}</div>
-          <div class="s-detail">${d.groupName}</div>
-        </div>
-        <div class="summary-card highlight">
-          <div class="s-label">Mensalidade total</div>
-          <div class="s-value red">R$ ${d.monthlyTotal}</div>
-          <div class="s-detail">Demais parcelas</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">Custo por pessoa</div>
-          <div class="s-value">${per}</div>
-          <div class="s-detail">Média mensal</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">Plano</div>
-          <div class="s-value" style="font-size:18px">${d.planName}</div>
-          <div class="s-detail">${d.accommodation} · ${d.copValue === 'Não' ? 'Sem copart.' : 'Com copart.'}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PLANO SELECIONADO -->
-    <div class="slide">
-      <div class="section-head">
-        <div class="section-icon">✅</div>
-        <div><div class="section-title">Plano Selecionado</div><div class="section-sub">Benefícios e coberturas incluídas</div></div>
-      </div>
-      <div class="plan-body">
-        <div class="plan-name-badge">🏥 Bradesco Saúde ${d.planName} · ${d.accommodation}</div>
-        <div class="plan-features">
-          ${d.hasMeuDoutor ? '<div class="feat-chip">✓ Programa Meu Doutor</div>' : ''}
-          ${d.hasDescFarm  ? '<div class="feat-chip">✓ Desconto Farmácia</div>' : ''}
-          ${d.hasClube     ? '<div class="feat-chip">✓ Clube+ Saúde</div>' : ''}
-          <div class="feat-chip">✓ Cobertura Nacional</div>
-          <div class="feat-chip ${d.copValue === 'Não' ? '' : 'red-chip'}">
-            ${d.copValue === 'Não' ? '✓ Sem Coparticipação' : '⚡ Com Coparticipação'}
-          </div>
-          ${d.reembolso ? `<div class="feat-chip">✓ Reembolso R$ ${d.reembolso}/consulta</div>` : ''}
-          <div class="feat-chip">✓ Acomodação ${d.accommodation}</div>
-          <div class="feat-chip">✓ Rede credenciada nacional</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TABELA POR FAIXA ETÁRIA -->
-    <div class="slide">
-      <div class="section-head">
-        <div class="section-icon">💰</div>
-        <div><div class="section-title">Valores por Faixa Etária</div><div class="section-sub">Mensalidade individual por faixa · Plano ${d.planName} ${d.accommodation}</div></div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Faixa Etária</th>
-              <th>Valor Unitário</th>
-              <th>Nº Pessoas</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${d.ageBrackets.filter(b => b.valor !== '—').map(b => `
-              <tr>
-                <td>${b.faixa} anos</td>
-                <td class="${b.pessoas === '0' ? 'zero' : ''}">${b.valor !== '—' ? 'R$ ' + b.valor : '—'}</td>
-                <td class="${b.pessoas === '0' ? 'zero' : ''}">${b.pessoas}</td>
-                <td class="${b.subtotal === '—' ? 'zero' : 'selected-row'}">${b.subtotal}</td>
-              </tr>`).join('')}
-            <tr style="background:#FFF0F0;font-weight:800">
-              <td colspan="2">Total Mensal</td>
-              <td>${d.totalPeople} vidas</td>
-              <td style="color:var(--red)">R$ ${d.monthlyTotal}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- COMPARE PLANOS -->
-    ${d.plansComp.length > 0 ? `
-    <div class="slide">
-      <div class="section-head">
-        <div class="section-icon">🔄</div>
-        <div><div class="section-title">Compare os Planos Bradesco</div><div class="section-sub">Todas as opções disponíveis para o grupo</div></div>
-      </div>
-      <div class="comp-wrap">
-        <table class="comp-table">
-          <thead>
-            <tr>
-              <th>Plano</th>
-              <th>Copart.</th>
-              <th>Reembolso</th>
-              <th>Meu Doutor</th>
-              <th>Desc. Farmácia</th>
-              <th>Clube+</th>
-              <th>Valor / mês</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${d.plansComp.map(p => `
-              <tr class="${p.isSelected ? 'is-selected' : ''}">
-                <td>
-                  ${p.name}
-                  ${p.isSelected ? '<span class="selected-badge">Selecionado</span>' : ''}
-                </td>
-                <td>${p.copart === 'Não' ? '<span class="badge-check">✓</span>' : '<span class="badge-x">✗</span>'}</td>
-                <td>R$ ${p.reembolso}</td>
-                <td><span class="badge-check">✓</span></td>
-                <td><span class="badge-check">✓</span></td>
-                <td><span class="badge-check">✓</span></td>
-                <td class="price-cell">
-                  R$ ${p.valor}
-                  <small>${d.totalPeople} vida${d.totalPeople !== 1 ? 's' : ''}</small>
-                </td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>` : ''}
-
-    <!-- CARÊNCIAS -->
-    <div class="slide">
-      <div class="section-head">
-        <div class="section-icon">⏱️</div>
-        <div><div class="section-title">Carências</div><div class="section-sub">Grupos de 3 a 9 pessoas</div></div>
-      </div>
-      <div class="wait-grid">
-        ${d.waiting.map(w => `
-          <div class="wait-item">
-            <div class="wait-icon">${w.icon}</div>
-            <div>
-              <div class="wait-name">${w.proc}</div>
-              <div class="wait-vals">
-                Sem aproveitamento: <strong>${w.semAprov}</strong><br>
-                Com aproveitamento: <span>${w.comAprov}</span>
-              </div>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>
-
-    <!-- DIFERENCIAIS BRADESCO -->
-    <div class="slide">
-      <div class="section-head">
-        <div class="section-icon">⭐</div>
-        <div><div class="section-title">Por que Bradesco Saúde?</div><div class="section-sub">Diferenciais que fazem a diferença</div></div>
-      </div>
-      <div class="diff-grid">
-        <div class="diff-card">
-          <span class="diff-emoji">🏥</span>
-          <div class="diff-name">Maior rede do Brasil</div>
-          <div class="diff-desc">Mais de 37.000 prestadores credenciados em todo o território nacional.</div>
-        </div>
-        <div class="diff-card">
-          <span class="diff-emoji">📱</span>
-          <div class="diff-name">Programa Meu Doutor</div>
-          <div class="diff-desc">Clínica digital com telemedicina 24h, agendamento online e prontuário digital.</div>
-        </div>
-        <div class="diff-card">
-          <span class="diff-emoji">💊</span>
-          <div class="diff-name">Desconto Farmácia</div>
-          <div class="diff-desc">Até 40% de desconto em medicamentos nas principais redes farmacêuticas do país.</div>
-        </div>
-        <div class="diff-card">
-          <span class="diff-emoji">🎯</span>
-          <div class="diff-name">Clube+ Saúde</div>
-          <div class="diff-desc">Descontos em academias, clínicas, óticas, nutrição e muito mais para todos os beneficiários.</div>
-        </div>
-        <div class="diff-card">
-          <span class="diff-emoji">🔒</span>
-          <div class="diff-name">Solidez Financeira</div>
-          <div class="diff-desc">Grupo Bradesco — mais de 80 anos de história e estabilidade no mercado financeiro nacional.</div>
-        </div>
-        <div class="diff-card">
-          <span class="diff-emoji">📋</span>
-          <div class="diff-name">Reembolso Específico</div>
-          <div class="diff-desc">Cobertura de consultas fora da rede com reembolso automático e ágil direto na conta.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRÓXIMOS PASSOS -->
-    <div class="slide">
-      <div class="slide-footer">
-        <div class="footer-title">Pronto para contratar?</div>
-        <div class="footer-sub">Esta simulação foi gerada pelo sistema SPG Bradesco Saúde em ${d.date}.<br>Os valores podem sofrer ajustes após análise da seguradora.</div>
-        <a href="#" class="footer-cta" onclick="return false">Avançar para contratação →</a>
-        <div class="footer-note">Bradesco Saúde · Corretor Tech · CNPJ Empresa: ${d.cnpj}</div>
-      </div>
-    </div>
-  `;
+/* ═══════════ UTILS ═══════════ */
+function fmt(v) {
+  return 'R$ ' + (+v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
