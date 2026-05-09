@@ -826,8 +826,8 @@ function buildCarenciaSlide(d) {
       <div>
         <div class="wait-name">${c.proc}</div>
         <div style="margin-top:4px">
-          <span class="wait-tag ${c.level}">Sem aproveitamento: ${c.sem}</span>
-          <span class="wait-tag low">Com aproveitamento: ${c.com}</span>
+          <span class="wait-tag low">Sem aproveitamento: ${c.sem}</span>
+          <span class="wait-tag zero">Com aproveitamento: ${c.com}</span>
         </div>
       </div>
     </div>`).join('');
@@ -880,7 +880,7 @@ function buildDiffSlide(d) {
 /* ═══════════ SLIDE: CONTRACAPA ═══════════ */
 function buildBackCover(d) {
   const logoHtml = d.logoUrl
-    ? `<img src="${d.logoUrl}" style="max-height:52px;max-width:200px;object-fit:contain;filter:brightness(0) invert(1)">`
+    ? `<div style="background:#fff;border-radius:10px;padding:10px 20px;display:inline-flex;align-items:center;justify-content:center"><img src="${d.logoUrl}" style="max-height:48px;max-width:180px;object-fit:contain"></div>`
     : `<div style="background:rgba(255,255,255,.15);border-radius:10px;padding:12px 24px;font-size:15px;font-weight:800;color:rgba(255,255,255,.8);letter-spacing:1.5px">CORRETORA</div>`;
   return `
   <div class="slide-box" id="sl-back">
