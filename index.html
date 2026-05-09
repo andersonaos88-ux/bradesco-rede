@@ -673,52 +673,23 @@ function syncBradReembolso() {
 
 /* ═══════════ PER-PLAN REEMBOLSO SIDEBAR ═══════════ */
 function renderBradPlansReembSection() {
-  const section  = document.getElementById('brad-plans-reemb-section');
+  // Reembolso é auto-preenchido da tabela e exibido diretamente no slide.
+  // Sidebar não precisa de seção editável para multi-plano.
+  const section   = document.getElementById('brad-plans-reemb-section');
   const toggleRow = document.getElementById('brad-reemb-toggle-row');
   const singleBox = document.getElementById('brad-reemb-container');
   if (!section) return;
 
-  if (!state.bradPlans || state.bradPlans.length === 0) {
+  if (state.bradPlans && state.bradPlans.length > 0) {
+    // Multi-plano: oculta controles manuais de reembolso
+    if (toggleRow) toggleRow.style.display = 'none';
+    if (singleBox) singleBox.style.display  = 'none';
     section.style.display = 'none';
+  } else {
+    // Modo manual: mostra toggle normal
     if (toggleRow) toggleRow.style.display = '';
-    return;
+    section.style.display = 'none';
   }
-
-  // Multi-plan mode: oculta o toggle/input único, mostra seção por plano
-  if (toggleRow) toggleRow.style.display = 'none';
-  if (singleBox) singleBox.style.display  = 'none';
-  section.style.display = '';
-
-  let html = '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px">Reembolso por Plano Bradesco</div>';
-
-  state.bradPlans.forEach((p, i) => {
-    const reembData = BRAD_REEMBOLSO[p.plano];
-    const color = BRAD_COLORS[i] || BRAD_COLORS[0];
-    html += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:8px;border-left:3px solid ${color}">`;
-    html += `<div style="font-size:11px;font-weight:700;color:${color};margin-bottom:8px">● ${esc(p.plano)}${p.acom ? ' · ' + esc(p.acom) : ''}</div>`;
-
-    if (Array.isArray(reembData)) {
-      html += `<div class="fg"><label style="font-size:10px">Nível de Reembolso</label><select id="brad-reemb-${i}" onchange="updatePlanReembolso(${i})" style="width:100%">`;
-      reembData.forEach((v, j) => {
-        const sel = Math.abs((p.reembolso || reembData[0]) - v) < 0.01 ? ' selected' : '';
-        html += `<option value="${v}"${sel}>R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})} — Nível ${j+1}</option>`;
-      });
-      html += `</select></div>`;
-    } else {
-      const cur = (p.reembolso != null && p.reembolso > 0) ? p.reembolso : (reembData || '');
-      html += `<div class="fg"><label style="font-size:10px">Reembolso por consulta (R$)</label><input id="brad-reemb-${i}" type="number" min="0" step="0.01" value="${cur !== '' ? Number(cur).toFixed(2) : ''}" oninput="updatePlanReembolso(${i})" style="width:100%"></div>`;
-    }
-    html += `</div>`;
-  });
-
-  section.innerHTML = html;
-}
-
-function updatePlanReembolso(i) {
-  const el = document.getElementById(`brad-reemb-${i}`);
-  if (!el || !state.bradPlans[i]) return;
-  state.bradPlans[i].reembolso = parseFloat(el.value) || 0;
-  render();
 }
 
 /* ═══════════ SLIDE OPTIONS ═══════════ */
@@ -782,7 +753,7 @@ function render() {
   const d = getData();
   const wrap = document.getElementById('doc-wrap');
   let html = buildCover(d) + buildComp(d);
-  if (d.showCop && d.brad.cop) html += buildCopSlide(d);
+  if (d.showCop && d.bradPlans.some(p => p.cop)) html += buildCopSlide(d);
   if (d.showWait) html += buildCarenciaSlide(d);
   if (d.showDiff) html += buildDiffSlide(d);
   html += buildBackCover(d);
@@ -835,8 +806,6 @@ function buildComp(d) {
   const atualIns = INS[d.atual.seg] || INS.outro;
   const vidas = d.brad.vidas;
   const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
-  const atualPC = d.atual.valor > 0 && vidas > 0 ? fmt(d.atual.valor / vidas) : '—';
-
   // Cards de cada plano Bradesco
   const bradCards = d.bradPlans.map((p, i) => {
     const ganhoMensal = d.atual.valor - p.valor;
@@ -844,7 +813,6 @@ function buildComp(d) {
     const ganhoClass  = ganhoAnual > 200 ? 'positivo' : ganhoAnual < -200 ? 'negativo' : 'neutro';
     const ganhoIcon   = ganhoAnual > 200 ? '▼' : ganhoAnual < -200 ? '▲' : '≈';
     const ganhoLabel  = ganhoAnual > 200 ? 'Economia' : ganhoAnual < -200 ? 'Invest. adicional' : 'Equivalente';
-    const pc = p.valor > 0 && vidas > 0 ? fmt(p.valor / vidas) : '—';
     const color = BRAD_COLORS[i] || BRAD_COLORS[BRAD_COLORS.length - 1];
     return `
     <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 6px">
@@ -852,7 +820,7 @@ function buildComp(d) {
       <div style="font-size:10px;font-weight:800;color:${color};text-align:center;line-height:1.2">${esc(p.plano)}</div>
       ${p.acom ? `<div style="font-size:9px;color:var(--muted)">${esc(p.acom)}</div>` : ''}
       <span class="cop-chip ${p.cop ? 'sim' : 'nao'}" style="font-size:8px">${p.cop ? 'Com Cop.' : 'Sem Cop.'}</span>
-      <div style="font-size:9px;color:var(--muted)">${vidas} vid. · ${pc}/cap</div>
+      <div style="font-size:9px;color:var(--muted)">${vidas} vida${vidas !== 1 ? 's' : ''}</div>
       ${p.reembolso ? `<span class="reembolso-chip" style="font-size:8px">↩ ${fmt(p.reembolso)}</span>` : ''}
       ${d.atual.valor > 0 && p.valor > 0 ? `
         <span class="ganho-chip ${ganhoClass}" style="font-size:9px;margin-top:4px;white-space:nowrap">${ganhoIcon} ${ganhoLabel}</span>
@@ -875,7 +843,7 @@ function buildComp(d) {
           <div class="plan-meta">
             <span class="plan-name-label" style="color:${atualIns.color}">${esc(d.atual.plano)}</span>
             <span class="cop-chip ${d.atual.cop ? 'sim' : 'nao'}">${d.atual.cop ? 'Com Cop.' : 'Sem Cop.'}</span>
-            <span class="vidas-chip">${vidas} vid. · ${atualPC}/cap</span>
+            <span class="vidas-chip">${vidas} vida${vidas !== 1 ? 's' : ''}</span>
             ${d.atual.reembolso ? `<span class="reembolso-chip">↩ ${fmt(d.atual.reembolso)}</span>` : ''}
           </div>
         </div>
@@ -902,13 +870,39 @@ function buildComp(d) {
 
 /* ═══════════ SLIDE: COPARTICIPAÇÃO ═══════════ */
 function buildCopSlide(d) {
-  const planoKey = d.brad.plano;
-  const vals = BRAD_COP.planos[planoKey] || BRAD_COP.planos['Efetivo'];
   const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
+
+  // Filtra apenas os planos que têm coparticipação
+  const copPlans = d.bradPlans.filter(p => p.cop);
+  // Se nenhum plano tem cop, usa o plano do formulário como fallback
+  const plansToShow = copPlans.length > 0 ? copPlans : [{
+    plano: d.brad.plano, acom: d.brad.acom, cop: true
+  }];
+
   const thSt = `padding:10px 12px;text-align:center;font-size:10px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.6px`;
   const tdPr = `padding:9px 12px;font-size:11px;color:var(--text);border-bottom:1px solid #f0f0f5;white-space:nowrap`;
   const tdVl = `padding:9px 12px;font-size:12px;font-weight:800;color:var(--red);text-align:center;border-bottom:1px solid #f0f0f5;border-left:1px solid #f0f0f5`;
-  const rows = BRAD_COP.procedimentos.map((p, i) => `<tr><td style="${tdPr}">${p}</td><td style="${tdVl}">${vals[i] || '—'}</td></tr>`).join('');
+
+  // Cabeçalhos dos planos
+  const planHeaders = plansToShow.map((p, i) => {
+    const color = BRAD_COLORS[d.bradPlans.indexOf(p)] || BRAD_COLORS[i] || BRAD_COLORS[0];
+    return `<th style="${thSt}"><span style="display:block;font-size:9px;opacity:.75">${esc(p.acom || '')}</span>${esc(p.plano)}</th>`;
+  }).join('');
+
+  // Linhas: uma célula por plano
+  const rows = BRAD_COP.procedimentos.map((proc, ri) => {
+    const cells = plansToShow.map(p => {
+      const vals = BRAD_COP.planos[p.plano] || BRAD_COP.planos['Efetivo'];
+      return `<td style="${tdVl}">${vals[ri] || '—'}</td>`;
+    }).join('');
+    return `<tr><td style="${tdPr}">${proc}</td>${cells}</tr>`;
+  }).join('');
+
+  // Título dinâmico
+  const titleStr = plansToShow.length === 1
+    ? `Coparticipação — ${esc(plansToShow[0].plano)}${plansToShow[0].acom ? ' ' + esc(plansToShow[0].acom) : ''}`
+    : `Coparticipação — ${plansToShow.length} planos comparados`;
+
   return `
   <div class="slide-box" id="sl-cop">
     <div class="s-cop">
@@ -917,7 +911,7 @@ function buildCopSlide(d) {
         <div class="slide-sec-bar" style="background:var(--red);height:44px"></div>
         <div>
           <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:var(--red)">Bradesco Saúde</div>
-          <div class="slide-sec-title">Coparticipação — ${esc(d.brad.plano)} ${esc(d.brad.acom)}</div>
+          <div class="slide-sec-title">${titleStr}</div>
           <div class="slide-sec-sub">${BRAD_COP.subtitulo}</div>
         </div>
       </div>
@@ -925,7 +919,7 @@ function buildCopSlide(d) {
         <thead>
           <tr style="background:var(--red)">
             <th style="${thSt};text-align:left">Procedimento</th>
-            <th style="${thSt}">${esc(d.brad.plano)}</th>
+            ${planHeaders}
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -1117,7 +1111,7 @@ async function gerarPDF() {
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [297, 167] });
     const d = getData();
     const ids = ['sl-cover','sl-comp'];
-    if (d.showCop && d.brad.cop) ids.push('sl-cop');
+    if (d.showCop && d.bradPlans.some(p => p.cop)) ids.push('sl-cop');
     if (d.showWait) ids.push('sl-wait');
     if (d.showDiff) ids.push('sl-diff');
     ids.push('sl-back');
