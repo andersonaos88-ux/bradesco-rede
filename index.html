@@ -478,13 +478,14 @@ const BRAD_REEMBOLSO = {
 };
 
 const BRAD_CARENCIAS = [
-  { proc: 'Urgência e Emergência', icon: '🚨', sem: 'Sem carência', com: 'Sem carência', level: 'zero' },
-  { proc: 'Consultas eletivas',     icon: '🩺', sem: 'Sem carência', com: 'Sem carência', level: 'zero' },
-  { proc: 'Exames Simples (Tipo A)',icon: '🔬', sem: '30 dias',       com: 'Sem carência', level: 'low'  },
-  { proc: 'Exames Especiais (Tipo B)',icon:'🧪',sem: '60 dias',       com: '30 dias',       level: 'low'  },
-  { proc: 'Internações e Cirurgias',icon: '🏥', sem: '180 dias',      com: '90 dias',       level: 'mid'  },
-  { proc: 'Parto',                  icon: '👶', sem: '300 dias',      com: '150 dias',      level: 'mid'  },
-  { proc: 'Doenças Preexistentes (LCA)', icon: '📋', sem: '24 meses', com: '12 meses',     level: 'mid'  },
+  { proc: 'Urgência e emergência',              icon: '🚨', sem: '24 horas',  com: '24 horas',  level: 'zero' },
+  { proc: 'Consultas',                          icon: '🩺', sem: '15 dias',   com: 'Isento',    level: 'low'  },
+  { proc: 'Exames do tipo A',                   icon: '🔬', sem: '15 dias',   com: 'Isento',    level: 'low'  },
+  { proc: 'Exames do tipo B',                   icon: '🧪', sem: '180 dias',  com: 'Isento',    level: 'mid'  },
+  { proc: 'Terapias não médicas',               icon: '🧘', sem: '180 dias',  com: '180 dias',  level: 'mid'  },
+  { proc: 'Internações clínicas',               icon: '🏥', sem: '180 dias',  com: 'Isento',    level: 'mid'  },
+  { proc: 'Cirurgias em geral (exceto bariátrica)', icon: '⚕️', sem: '180 dias', com: 'Isento', level: 'mid'  },
+  { proc: 'Cirurgia bariátrica',                icon: '🔪', sem: '180 dias',  com: '180 dias',  level: 'mid'  },
 ];
 
 const BRAD_DIFFS = [
@@ -815,7 +816,7 @@ function buildCarenciaSlide(d) {
         <div>
           <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:var(--red)">Bradesco Saúde</div>
           <div class="slide-sec-title">Carências do Plano</div>
-          <div class="slide-sec-sub">Grupos de 3 a 9 vidas — Sem portabilidade/aproveitamento de carência</div>
+          <div class="slide-sec-sub">Prazos para novos beneficiários — com e sem aproveitamento de carência</div>
         </div>
       </div>
       <div class="wait-grid">${items}</div>
