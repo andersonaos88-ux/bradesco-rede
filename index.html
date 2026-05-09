@@ -632,11 +632,14 @@ function syncAtualReembolso() {
   const seg   = document.getElementById('a-seg')?.value || 'outro';
   const plano = document.getElementById('a-plano')?.value || '';
   const field = document.getElementById('a-reembolso');
-  if (!field || field.value) return; // não sobrescreve se já tem valor
+  if (!field) return;
+  // Sempre atualiza ao trocar plano/operadora — valor vem da tabela REEMBOLSO_DATA
   const val = getAtualReembolso(seg, plano);
   if (val !== undefined) {
     const v = Array.isArray(val) ? val[0] : val;
     if (v > 0) field.value = v.toFixed(2);
+  } else {
+    field.value = ''; // plano sem reembolso cadastrado → limpa o campo
   }
 }
 
