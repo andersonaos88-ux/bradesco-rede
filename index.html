@@ -1232,7 +1232,6 @@ function extractPlansFromPDF(pages) {
   const results = [];
   const seen = new Set();
 
-  // Tenta página 3 (índice 2) primeiro, depois todas as páginas
   const pagesToSearch = pages.length >= 3
     ? [pages[2], ...pages.filter((_,i) => i !== 2)]
     : pages;
@@ -1241,41 +1240,61 @@ function extractPlansFromPDF(pages) {
     const lines = page || [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim().toUpperCase();
-
-      // Detecta nome do plano na linha
       const matchedKey = planNames.find(k => line.includes(k));
       if (!matchedKey) continue;
 
-      // Detecta acomodação
+      // Acomodação
       let acom = '';
-      const acomSearch = lines.slice(Math.max(0,i-2), i+4).join(' ').toUpperCase();
+      const acomSearch = lines.slice(Math.max(0,i-2), i+5).join(' ').toUpperCase();
       if (acomSearch.includes('QUARTO') || acomSearch.includes('APARTAMENTO')) acom = 'Apartamento';
       else if (acomSearch.includes('ENFERMARIA')) acom = 'Enfermaria';
 
-      // Detecta valor R$ nas linhas próximas
-      let valor = null;
-      for (let j = i; j < Math.min(i+6, lines.length); j++) {
-        const vm = lines[j].match(/R\$\s*([\d.,]+)/);
-        if (vm) {
-          valor = parseFloat(vm[1].replace(/\./g,'').replace(',','.'));
-          break;
+      // Coleta TODOS os valores R$ nas linhas próximas (janela de 12 linhas)
+      const nearLines = lines.slice(Math.max(0,i-1), Math.min(i+12, lines.length));
+      const allVals = [];
+      for (const nl of nearLines) {
+        // Formato "R$ 1.234,56" ou "R$ 109,76"
+        const matches = [...nl.matchAll(/R\$\s*([\d]{1,3}(?:\.[\d]{3})*,\d{2})/g)];
+        for (const m of matches) {
+          const v = parseFloat(m[1].replace(/\./g,'').replace(',','.'));
+          if (v > 0) allVals.push(v);
         }
-        // valor sem R$ (apenas número grande, ex: "15.234,00")
-        const nm = lines[j].match(/^([\d]{1,3}(?:\.[\d]{3})+,\d{2})$/);
+        // Formato standalone "15.234,00" (sem R$)
+        const nm = nl.trim().match(/^([\d]{1,3}(?:\.[\d]{3})+,\d{2})$/);
         if (nm) {
-          valor = parseFloat(nm[1].replace(/\./g,'').replace(',','.'));
-          break;
+          const v = parseFloat(nm[1].replace(/\./g,'').replace(',','.'));
+          if (v > 0) allVals.push(v);
         }
+        // Formato reembolso standalone "439,03" (centenas com vírgula)
+        const sm = nl.trim().match(/^(\d{2,3},\d{2})$/);
+        if (sm) {
+          const v = parseFloat(sm[1].replace(',','.'));
+          if (v >= 50 && v < 2000) allVals.push(v);
+        }
+      }
+
+      if (!allVals.length) continue;
+
+      // Valor total = maior valor encontrado
+      const valor = Math.max(...allVals);
+
+      // Reembolso = valor < 2000 e significativamente menor que o total
+      // (o reembolso do Bradesco vai de R$ 109,76 até R$ 878,06)
+      const hasEspecifico = /espec[íi]fico/i.test(nearLines.join(' '));
+      let reembolso = null;
+      if (hasEspecifico) {
+        const rembs = allVals.filter(v => v < 2000 && v !== valor && v >= 50);
+        if (rembs.length) reembolso = Math.max(...rembs); // pega o maior nível se houver mais de um
       }
 
       const planLabel = PLAN_MAP[matchedKey] + (acom ? ' ' + acom : '');
       const key = planLabel + '|' + valor;
       if (!seen.has(key) && valor) {
         seen.add(key);
-        results.push({ plano: PLAN_MAP[matchedKey], acom, valor, label: planLabel });
+        results.push({ plano: PLAN_MAP[matchedKey], acom, valor, label: planLabel, reembolso });
       }
     }
-    if (results.length > 0) break; // encontrou na página atual, para
+    if (results.length > 0) break;
   }
 
   return results;
@@ -1325,9 +1344,11 @@ function confirmPlanSelection() {
   document.querySelectorAll('#modal-plans-list input[type=checkbox]').forEach((cb, i) => {
     if (cb.checked) {
       const p = { ...planos[i] };
-      // Auto-preenche reembolso da tabela
-      const reembData = BRAD_REEMBOLSO[p.plano];
-      p.reembolso = Array.isArray(reembData) ? reembData[0] : (reembData || 0);
+      // Prioridade: reembolso extraído do PDF → tabela BRAD_REEMBOLSO → 0
+      if (!p.reembolso || p.reembolso === 0) {
+        const reembData = BRAD_REEMBOLSO[p.plano];
+        p.reembolso = Array.isArray(reembData) ? reembData[0] : (reembData || 0);
+      }
       chosen.push(p);
     }
   });
