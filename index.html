@@ -378,7 +378,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
           </div>
           <div class="fg">
             <label>Valor Mensal (R$)</label>
-            <input id="brad-valor" type="number" min="0" step="0.01" placeholder="15200.00" oninput="render()">
+            <input id="brad-valor" type="number" min="0" step="0.01" placeholder="15200.00" oninput="state.bradPlans=[];render()">
           </div>
         </div>
         <div class="fg">
@@ -507,6 +507,7 @@ let state = {
   showCop: true,
   showWait: true,
   showDiff: true,
+  bradPlans: [], // planos selecionados no modal PDF (múltiplos)
 };
 let charts = [];
 let renderGen = 0;
@@ -640,6 +641,15 @@ function getData() {
       cop:      state.copBrad,
       reembolso: state.bradReembShow ? (parseFloat(document.getElementById('brad-reembolso')?.value) || 0) : 0,
     },
+    // Se vieram do modal PDF, usa lista múltipla; senão cria lista com o plano do formulário
+    bradPlans: state.bradPlans.length > 0 ? state.bradPlans : [{
+      plano:  document.getElementById('brad-plano')?.value || 'Efetivo',
+      acom:   document.getElementById('brad-acom')?.value || 'Apartamento',
+      valor:  parseFloat(document.getElementById('brad-valor')?.value) || 0,
+      cop:    state.copBrad,
+      reembolso: state.bradReembShow ? (parseFloat(document.getElementById('brad-reembolso')?.value) || 0) : 0,
+      label:  (document.getElementById('brad-plano')?.value || 'Efetivo') + ' ' + (document.getElementById('brad-acom')?.value || 'Apartamento'),
+    }],
     showCop:  state.showCop,
     showWait: state.showWait,
     showDiff: state.showDiff,
@@ -697,58 +707,72 @@ function buildCover(d) {
 }
 
 /* ═══════════ SLIDE: COMPARAÇÃO ═══════════ */
+const BRAD_COLORS = ['#CC0000','#E53935','#FF6B6B','#FF9999','#FFB3B3','#CC6666'];
+
 function buildComp(d) {
   const atualIns = INS[d.atual.seg] || INS.outro;
-  const ganhoMensal = d.atual.valor - d.brad.valor;
-  const ganhoAnual  = ganhoMensal * 12;
-  const ganhoClass  = ganhoAnual > 200 ? 'positivo' : ganhoAnual < -200 ? 'negativo' : 'neutro';
-  const ganhoIcon   = ganhoAnual > 200 ? '▼' : ganhoAnual < -200 ? '▲' : '≈';
-  const ganhoLabel  = ganhoAnual > 200 ? 'Economia anual' : ganhoAnual < -200 ? 'Investimento adicional' : 'Valores equivalentes';
-  const atualPC = d.atual.valor > 0 && d.atual.vidas > 0 ? fmt(d.atual.valor / d.atual.vidas) : '—';
-  const bradPC  = d.brad.valor  > 0 && d.brad.vidas  > 0 ? fmt(d.brad.valor  / d.brad.vidas)  : '—';
+  const vidas = d.brad.vidas;
   const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
+  const atualPC = d.atual.valor > 0 && vidas > 0 ? fmt(d.atual.valor / vidas) : '—';
+
+  // Cards de cada plano Bradesco
+  const bradCards = d.bradPlans.map((p, i) => {
+    const ganhoMensal = d.atual.valor - p.valor;
+    const ganhoAnual  = ganhoMensal * 12;
+    const ganhoClass  = ganhoAnual > 200 ? 'positivo' : ganhoAnual < -200 ? 'negativo' : 'neutro';
+    const ganhoIcon   = ganhoAnual > 200 ? '▼' : ganhoAnual < -200 ? '▲' : '≈';
+    const ganhoLabel  = ganhoAnual > 200 ? 'Economia' : ganhoAnual < -200 ? 'Invest. adicional' : 'Equivalente';
+    const pc = p.valor > 0 && vidas > 0 ? fmt(p.valor / vidas) : '—';
+    const color = BRAD_COLORS[i] || BRAD_COLORS[BRAD_COLORS.length - 1];
+    return `
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 6px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${color};margin-bottom:2px"></div>
+      <div style="font-size:10px;font-weight:800;color:${color};text-align:center;line-height:1.2">${esc(p.plano)}</div>
+      ${p.acom ? `<div style="font-size:9px;color:var(--muted)">${esc(p.acom)}</div>` : ''}
+      <span class="cop-chip ${p.cop ? 'sim' : 'nao'}" style="font-size:8px">${p.cop ? 'Com Cop.' : 'Sem Cop.'}</span>
+      <div style="font-size:9px;color:var(--muted)">${vidas} vid. · ${pc}/cap</div>
+      ${p.reembolso ? `<span class="reembolso-chip" style="font-size:8px">↩ ${fmt(p.reembolso)}</span>` : ''}
+      ${d.atual.valor > 0 && p.valor > 0 ? `
+        <span class="ganho-chip ${ganhoClass}" style="font-size:9px;margin-top:4px;white-space:nowrap">${ganhoIcon} ${ganhoLabel}</span>
+        <div style="font-size:8px;color:var(--muted);white-space:nowrap">${fmt(Math.abs(ganhoAnual))}/ano</div>
+      ` : ''}
+    </div>`;
+  }).join(`<div style="width:1px;background:var(--border);margin:0 4px;align-self:stretch"></div>`);
+
   return `
   <div class="slide-box" id="sl-comp">
     <div class="s-comp">
       ${logoWm}
       <div class="s-title">Por que migrar para a <em>Bradesco Saúde?</em></div>
-      <div class="comp-grid">
-        <div class="comp-col atual">
+      <div style="display:flex;gap:0;align-items:stretch">
+        <!-- Atual -->
+        <div style="width:180px;flex-shrink:0;display:flex;flex-direction:column;align-items:center">
           <div class="col-label">Plano Atual</div>
-          <div style="text-align:center;margin-bottom:8px">
-            <span class="ins-tag" style="border-color:${atualIns.color};color:${atualIns.color}">${atualIns.label}</span>
-          </div>
-          <div class="chart-wrap"><canvas id="ch-atual"></canvas></div>
+          <span class="ins-tag" style="border-color:${atualIns.color};color:${atualIns.color};margin-bottom:8px">${atualIns.label}</span>
+          <div class="chart-wrap" style="width:100%"><canvas id="ch-atual"></canvas></div>
           <div class="plan-meta">
             <span class="plan-name-label" style="color:${atualIns.color}">${esc(d.atual.plano)}</span>
-            <span class="cop-chip ${d.atual.cop ? 'sim' : 'nao'}">${d.atual.cop ? 'Com Coparticipação' : 'Sem Coparticipação'}</span>
-            <span class="vidas-chip">${d.atual.vidas} vida${d.atual.vidas !== 1 ? 's' : ''} · ${atualPC}/capita</span>
-            ${d.atual.reembolso ? `<span class="reembolso-chip">↩ Reembolso ${fmt(d.atual.reembolso)}</span>` : ''}
+            <span class="cop-chip ${d.atual.cop ? 'sim' : 'nao'}">${d.atual.cop ? 'Com Cop.' : 'Sem Cop.'}</span>
+            <span class="vidas-chip">${vidas} vid. · ${atualPC}/cap</span>
+            ${d.atual.reembolso ? `<span class="reembolso-chip">↩ ${fmt(d.atual.reembolso)}</span>` : ''}
           </div>
         </div>
         <div class="vert-sep"></div>
-        <div class="comp-col brad">
-          <div class="col-label" style="color:var(--red)">Bradesco Saúde</div>
-          <div style="text-align:center;margin-bottom:8px">
-            <span class="ins-tag" style="border-color:var(--red);color:var(--red)">Bradesco</span>
-          </div>
-          <div class="chart-wrap"><canvas id="ch-brad"></canvas></div>
-          <div class="plan-meta">
-            <span class="plan-name-label" style="color:var(--red)">${esc(d.brad.plano)} ${esc(d.brad.acom)}</span>
-            <span class="cop-chip ${d.brad.cop ? 'sim' : 'nao'}">${d.brad.cop ? 'Com Coparticipação' : 'Sem Coparticipação'}</span>
-            <span class="vidas-chip">${d.brad.vidas} vida${d.brad.vidas !== 1 ? 's' : ''} · ${bradPC}/capita</span>
-            ${d.brad.reembolso ? `<span class="reembolso-chip">↩ Reembolso ${fmt(d.brad.reembolso)}</span>` : ''}
-            ${(d.atual.valor > 0 && d.brad.valor > 0) ? `
-            <span class="ganho-chip ${ganhoClass}" style="margin-top:6px">${ganhoIcon} ${ganhoLabel}: ${fmt(Math.abs(ganhoAnual))}</span>
-            <span class="ganho-label">por ano (${d.brad.vidas} vidas)</span>
-            ` : ''}
+        <!-- Bradesco — canvas multi-barras -->
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div class="col-label" style="color:var(--red);text-align:center">Bradesco Saúde</div>
+          <span class="ins-tag" style="border-color:var(--red);color:var(--red);display:block;text-align:center;margin-bottom:8px">Bradesco</span>
+          <div class="chart-wrap" style="flex:1"><canvas id="ch-brad"></canvas></div>
+          <!-- Metadados dos planos -->
+          <div style="display:flex;justify-content:space-around;padding-top:8px;margin-top:4px;border-top:1px solid var(--border)">
+            ${bradCards}
           </div>
         </div>
       </div>
       <div class="divider"></div>
       <div class="legend-row">
         <div class="leg-item"><div class="leg-dot" style="background:${atualIns.color}"></div>${atualIns.label} — Plano atual</div>
-        <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Bradesco Saúde — Plano proposto</div>
+        ${d.bradPlans.map((p,i) => `<div class="leg-item"><div class="leg-dot" style="background:${BRAD_COLORS[i]||BRAD_COLORS[0]}"></div>${esc(p.label||p.plano)}</div>`).join('')}
       </div>
     </div>
   </div>`;
@@ -881,29 +905,11 @@ function buildBackCover(d) {
 
 /* ═══════════ CHARTS ═══════════ */
 function drawCharts(d) {
-  const allVals = [d.atual.valor, d.brad.valor].filter(v => v > 0);
+  const atualColor = (INS[d.atual.seg] || INS.outro).color;
+  const allVals = [d.atual.valor, ...d.bradPlans.map(p => p.valor)].filter(v => v > 0);
   if (!allVals.length) return;
   const maxV = Math.max(...allVals);
   const yMax = Math.ceil(maxV * 1.35 / 500) * 500;
-  const atualColor = (INS[d.atual.seg] || INS.outro).color;
-
-  const baseOpts = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-    animation: { duration: 250 },
-    layout: { padding: { top: 28 } },
-    scales: {
-      x: { grid: { display: false }, border: { display: false }, ticks: { display: false } },
-      y: {
-        min: 0, max: yMax, border: { display: false },
-        grid: { color: '#F0F0F5' },
-        ticks: {
-          callback: v => 'R$' + (v >= 1000 ? (v/1000).toLocaleString('pt-BR', {maximumFractionDigits:0}) + 'k' : v),
-          font: { size: 9 }, color: '#9999AA', maxTicksLimit: 6,
-        },
-      },
-    },
-  };
 
   const labelPlugin = {
     id: 'lbl',
@@ -911,32 +917,73 @@ function drawCharts(d) {
       const ctx = chart.ctx;
       chart.data.datasets.forEach((ds, di) => {
         chart.getDatasetMeta(di).data.forEach((bar, i) => {
-          const v = ds.data[i]; if (!v || bar.height < 20) return;
+          const v = ds.data[i]; if (!v || bar.height < 18) return;
           ctx.save();
-          ctx.font = 'bold 11px "Open Sans", sans-serif';
+          ctx.font = 'bold 10px "Open Sans", sans-serif';
           ctx.fillStyle = '#fff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(fmt(v), bar.x, bar.y + bar.height / 2);
+          // Quebra valor em 2 linhas se barra for estreita
+          const txt = fmt(v);
+          const parts = txt.split(' ');
+          if (bar.width < 70 && parts.length === 2) {
+            ctx.fillText(parts[0], bar.x, bar.y + bar.height / 2 - 7);
+            ctx.fillText(parts[1], bar.x, bar.y + bar.height / 2 + 7);
+          } else {
+            ctx.fillText(txt, bar.x, bar.y + bar.height / 2);
+          }
           ctx.restore();
         });
       });
     },
   };
 
+  const scaleOpts = {
+    min: 0, max: yMax, border: { display: false },
+    grid: { color: '#F0F0F5' },
+    ticks: {
+      callback: v => 'R$' + (v >= 1000 ? (v/1000).toLocaleString('pt-BR', {maximumFractionDigits:0}) + 'k' : v),
+      font: { size: 9 }, color: '#9999AA', maxTicksLimit: 6,
+    },
+  };
+
+  // Canvas do plano atual (simples, 1 barra)
   const ca = document.getElementById('ch-atual');
-  if (ca) charts.push(new Chart(ca, {
+  if (ca && d.atual.valor > 0) charts.push(new Chart(ca, {
     type: 'bar',
     data: { labels: [''], datasets: [{ data: [d.atual.valor], backgroundColor: atualColor + 'DD', borderRadius: 8, borderSkipped: false }] },
-    options: baseOpts, plugins: [labelPlugin],
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      animation: { duration: 250 },
+      layout: { padding: { top: 28 } },
+      scales: { x: { grid: { display: false }, border: { display: false }, ticks: { display: false } }, y: scaleOpts },
+    },
+    plugins: [labelPlugin],
   }));
 
+  // Canvas do Bradesco — múltiplas barras (uma por plano selecionado)
   const cb = document.getElementById('ch-brad');
-  if (cb) charts.push(new Chart(cb, {
-    type: 'bar',
-    data: { labels: [''], datasets: [{ data: [d.brad.valor], backgroundColor: '#CC0000DD', borderRadius: 8, borderSkipped: false }] },
-    options: baseOpts, plugins: [labelPlugin],
-  }));
+  if (cb && d.bradPlans.length) {
+    const labels = d.bradPlans.map(p => p.label || p.plano);
+    const data   = d.bradPlans.map(p => p.valor);
+    const bgColors = d.bradPlans.map((_, i) => (BRAD_COLORS[i] || BRAD_COLORS[0]) + 'DD');
+    charts.push(new Chart(cb, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: bgColors, borderRadius: 8, borderSkipped: false }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { duration: 250 },
+        layout: { padding: { top: 28 } },
+        scales: {
+          x: { grid: { display: false }, border: { display: false }, ticks: { display: false } },
+          y: scaleOpts,
+        },
+      },
+      plugins: [labelPlugin],
+    }));
+  }
 }
 
 /* ═══════════ PDF EXPORT ═══════════ */
@@ -1119,45 +1166,55 @@ function extractPlansFromPDF(pages) {
 }
 
 /* ═══════════ MODAL ═══════════ */
-let _selectedPlanIdx = null;
-
 function openPlanModal(planos) {
-  _selectedPlanIdx = null;
   const list = document.getElementById('modal-plans-list');
   list.innerHTML = '';
   planos.forEach((p, i) => {
     const div = document.createElement('div');
     div.className = 'plan-opt';
     div.innerHTML = `
-      <input type="radio" name="plan-radio" id="pr-${i}" value="${i}">
-      <label class="plan-opt-name" for="pr-${i}">${p.label}</label>
+      <input type="checkbox" id="pr-${i}" value="${i}">
+      <label class="plan-opt-name" for="pr-${i}" onclick="event.stopPropagation();event.preventDefault();document.getElementById('pr-${i}').click();updateModalConfirm()">${p.label}</label>
       <span class="plan-opt-val">R$ ${p.valor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>
     `;
-    div.addEventListener('click', () => {
-      document.querySelectorAll('.plan-opt').forEach(el => el.classList.remove('sel'));
-      div.classList.add('sel');
-      document.getElementById(`pr-${i}`).checked = true;
-      _selectedPlanIdx = i;
-      document.getElementById('modal-confirm-btn').disabled = false;
+    div.addEventListener('click', (e) => {
+      if (e.target.tagName === 'INPUT') { updateModalConfirm(); return; }
+      const cb = div.querySelector('input');
+      cb.checked = !cb.checked;
+      div.classList.toggle('sel', cb.checked);
+      updateModalConfirm();
+    });
+    div.querySelector('input').addEventListener('change', () => {
+      div.classList.toggle('sel', div.querySelector('input').checked);
     });
     list.appendChild(div);
   });
-  // Armazena planos no modal para uso no confirm
   document.getElementById('plan-modal')._planos = planos;
+  document.getElementById('modal-confirm-btn').disabled = true;
   document.getElementById('plan-modal').classList.add('open');
+}
+
+function updateModalConfirm() {
+  const checked = document.querySelectorAll('#modal-plans-list input[type=checkbox]:checked');
+  document.getElementById('modal-confirm-btn').disabled = checked.length === 0;
 }
 
 function closePlanModal() {
   document.getElementById('plan-modal').classList.remove('open');
-  _selectedPlanIdx = null;
 }
 
 function confirmPlanSelection() {
-  if (_selectedPlanIdx === null) return;
   const planos = document.getElementById('plan-modal')._planos;
-  const chosen = planos[_selectedPlanIdx];
+  const chosen = [];
+  document.querySelectorAll('#modal-plans-list input[type=checkbox]').forEach((cb, i) => {
+    if (cb.checked) chosen.push(planos[i]);
+  });
+  if (!chosen.length) return;
   closePlanModal();
-  applyPlanData(chosen, _pdfPages);
+  // Salva múltiplos planos no state
+  state.bradPlans = chosen;
+  // Preenche formulário com o primeiro plano selecionado
+  applyPlanData(chosen[0], _pdfPages);
   render();
 }
 
