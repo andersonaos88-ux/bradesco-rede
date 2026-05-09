@@ -359,7 +359,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
       <!-- 5. Slides opcionais -->
       <div class="fsec">
         <div class="stitle"><span>📑</span> Slides da Apresentação</div>
-        <div class="check-opt" onclick="toggleOpt('cop')">
+        <div class="check-opt" id="opt-cop-wrap" onclick="toggleOpt('cop')">
           <input type="checkbox" id="opt-cop" checked onclick="event.stopPropagation();toggleOpt('cop')">
           <label for="opt-cop">Tabela de Coparticipação Bradesco</label>
         </div>
@@ -525,6 +525,10 @@ function setBradCop(v) {
   state.copBrad = v;
   document.getElementById('cop-b-sim').className = 'cop-btn' + (v ? ' active-sim' : '');
   document.getElementById('cop-b-nao').className = 'cop-btn' + (!v ? ' active-nao' : '');
+  // mostrar checkbox de coparticipação só se plano Bradesco tem cop
+  const wrap = document.getElementById('opt-cop-wrap');
+  if (wrap) wrap.style.display = v ? '' : 'none';
+  if (!v) { state.showCop = false; document.getElementById('opt-cop').checked = false; }
   render();
 }
 
