@@ -333,7 +333,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
         </div>
         <div class="toggle-row" onclick="toggleAtualReemb()">
           <input type="checkbox" id="rs-atual" onclick="event.stopPropagation();toggleAtualReemb()">
-          <label for="rs-atual">Informar reembolso por consulta</label>
+          <label for="rs-atual" onclick="event.stopPropagation();event.preventDefault();toggleAtualReemb()">Informar reembolso por consulta</label>
         </div>
         <div id="a-reemb-container" style="display:none">
           <div class="fg"><label>Reembolso por consulta (R$)</label><input id="a-reembolso" type="number" min="0" step="0.01" placeholder="200.00" oninput="render()"></div>
@@ -390,7 +390,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
         </div>
         <div class="toggle-row" onclick="toggleBradReemb()">
           <input type="checkbox" id="rs-brad" onclick="event.stopPropagation();toggleBradReemb()">
-          <label for="rs-brad">Exibir reembolso por consulta no documento</label>
+          <label for="rs-brad" onclick="event.stopPropagation();event.preventDefault();toggleBradReemb()">Exibir reembolso por consulta no documento</label>
         </div>
         <div id="brad-reemb-container" style="display:none">
           <div class="fg"><label>Reembolso por consulta (R$)</label><input id="brad-reembolso" type="number" min="0" step="0.01" oninput="render()"></div>
