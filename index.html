@@ -392,13 +392,15 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
             <button class="cop-btn" id="cop-b-nao" onclick="setBradCop(false)">✕ Sem Coparticipação</button>
           </div>
         </div>
-        <div class="toggle-row" onclick="toggleBradReemb()">
+        <div class="toggle-row" id="brad-reemb-toggle-row" onclick="toggleBradReemb()">
           <input type="checkbox" id="rs-brad" onclick="event.stopPropagation();toggleBradReemb()">
           <label for="rs-brad" onclick="event.stopPropagation();event.preventDefault();toggleBradReemb()">Exibir reembolso por consulta no documento</label>
         </div>
         <div id="brad-reemb-container" style="display:none">
           <div class="fg"><label>Reembolso por consulta (R$)</label><input id="brad-reembolso" type="number" min="0" step="0.01" oninput="render()"></div>
         </div>
+        <!-- Seção de reembolso por plano (modo multi-plano via PDF modal) -->
+        <div id="brad-plans-reemb-section" style="display:none"></div>
       </div>
 
       <!-- 5. Slides opcionais -->
@@ -474,37 +476,46 @@ const BRAD_COP = {
   }
 };
 
-// Valores típicos de reembolso por plano (ajuste conforme necessário)
-const ATUAL_REEMBOLSO = {
-  // SulAmérica
-  'Direto Nacional E': 200, 'Direto Nacional Q': 300,
-  'Exato E': 250, 'Exato Q': 350,
-  'Clássico Vital E': 300, 'Clássico Vital Q': 400,
-  'Clássico 100 E': 350, 'Especial 100 Q': 450,
-  'Especial Mais': 500, 'Executivo': 700, 'Prestige': 1000,
-  // Amil
-  'Bronze SP': 150, 'Bronze Mais': 200, 'Prata': 250, 'Ouro': 350, 'Ouro II': 400,
-  'Platinum R1': 500, 'Platinum R2': 600,
-  'S380 E': 380, 'S380 Q': 380, 'S450 E': 450, 'S450 Q': 450,
-  'S750 R1': 750, 'S750 R2': 750, 'S750 R3': 750,
-  'Black I': 1000, 'S2500': 1500, 'Black II': 2000, 'S6500 Black': 3000,
-  // Porto Seguro
-  'Pró ABCDM': 200, 'Prata Pró E': 250, 'Prata Pró Q': 300,
-  'Ouro Pró': 400, 'Diamante Pró': 600,
-  'Bronze Brasil E': 150, 'Bronze Brasil Q': 200,
-  'Prata Mais E': 300, 'Prata Mais Q': 350,
-  'Ouro Mais': 450, 'Ouro Max': 550, 'Diamante Mais': 700,
-  // Hapvida (sem reembolso por padrão)
-  '200 ABC': 0, '200 UP': 0, '300 E': 0, '500 E': 0, '500 Q': 0,
-  '600 E': 0, '600 Q': 0, '700 E': 0, '700 Q': 0,
+// Tabela de reembolso unificada por operadora → plano (mesmos dados do Portal de Cotação)
+const REEMBOLSO_DATA = {
+  bradesco: {
+    'Regional': 109.76, 'Saúde +': 109.76, 'Flex': 109.76, 'Ideal': 109.76,
+    'Efetivo': 109.76, 'Efetivo Plus': 109.76,
+    'Nacional':     [109.76, 219.52, 329.27],
+    'Nacional Plus':[439.03, 658.55, 878.06],
+  },
+  sulamerica: {
+    'Direto Nacional E': 90.00, 'Direto Nacional Q': 90.00,
+    'Clássico Vital E': 110.25, 'Clássico Vital Q': 110.25,
+    'Clássico 100 E': 110.25, 'Especial 100 Q': 150.30,
+    'Especial Mais Vital': 330.75, 'Especial Mais': 330.75,
+    'Executivo': [500.00, 660.00, 880.00],
+    'Prestige': 1000.00,
+  },
+  amil: {
+    'Ouro': 96.00, 'Ouro II': 80.00,
+    'Platinum R1': 240.00, 'Platinum R2': 328.00,
+    'S380 E': 80.00, 'S380 Q': 80.00,
+    'S450 E': 96.00, 'S450 Q': 96.00,
+    'S750 R1': 136.00, 'S750 R2': 240.00, 'S750 R3': 328.00,
+    'Black I': [432.00, 600.00], 'S2500': [432.00, 600.00],
+    'Black II': [600.00, 800.00, 1040.00], 'S6500 Black': 600.00,
+  },
+  portoseguro: {
+    'Bronze Brasil E': 95.00, 'Bronze Brasil Q': 95.00,
+    'Prata Mais E': 95.00, 'Prata Mais Q': 95.00,
+    'Ouro Mais': 152.00, 'Ouro Max': 249.00, 'Diamante Mais': 370.00,
+  },
+  hapvida: {
+    '600 E': 75.00, '600 Q': 75.00, '700 E': 96.00, '700 Q': 96.00,
+  },
 };
 
-const BRAD_REEMBOLSO = {
-  'Regional': 109.76, 'Saúde +': 109.76, 'Flex': 109.76, 'Ideal': 109.76,
-  'Efetivo': 109.76, 'Efetivo Plus': 109.76,
-  'Nacional': [109.76, 219.52, 329.27],
-  'Nacional Plus': [439.03, 658.55, 878.06],
-};
+// Atalhos por seguradora para uso interno
+const BRAD_REEMBOLSO = REEMBOLSO_DATA.bradesco;
+// Helper para plano atual
+function getAtualReembolso(seg, plano) { return REEMBOLSO_DATA[seg]?.[plano]; }
+
 
 const BRAD_CARENCIAS = [
   { proc: 'Urgência e emergência',              icon: '🚨', sem: '24 horas',  com: '24 horas',  level: 'zero' },
@@ -584,6 +595,10 @@ function syncAtualPlanOpts() {
     ? opts.map(p => `<option>${p}</option>`).join('')
     : '<option value="">— livre —</option>';
   syncDotAtual();
+  // Limpa reembolso para que o auto-fill funcione com a nova seguradora
+  const rf = document.getElementById('a-reembolso');
+  if (rf) rf.value = '';
+  syncAtualReembolso();
 }
 
 /* ═══════════ COP TOGGLES ═══════════ */
@@ -607,18 +622,27 @@ function setBradCop(v) {
 /* ═══════════ REEMBOLSO TOGGLES ═══════════ */
 function syncAtualReembolso() {
   if (!state.atualReembShow) return;
+  const seg   = document.getElementById('a-seg')?.value || 'outro';
   const plano = document.getElementById('a-plano')?.value || '';
   const field = document.getElementById('a-reembolso');
   if (!field || field.value) return; // não sobrescreve se já tem valor
-  const val = ATUAL_REEMBOLSO[plano];
-  if (val !== undefined && val > 0) field.value = val.toFixed(2);
+  const val = getAtualReembolso(seg, plano);
+  if (val !== undefined) {
+    const v = Array.isArray(val) ? val[0] : val;
+    if (v > 0) field.value = v.toFixed(2);
+  }
 }
 
 function toggleAtualReemb() {
   state.atualReembShow = !state.atualReembShow;
   document.getElementById('rs-atual').checked = state.atualReembShow;
   document.getElementById('a-reemb-container').style.display = state.atualReembShow ? '' : 'none';
-  if (state.atualReembShow) syncAtualReembolso();
+  if (state.atualReembShow) {
+    // Limpa para forçar auto-fill
+    const rf = document.getElementById('a-reembolso');
+    if (rf) rf.value = '';
+    syncAtualReembolso();
+  }
   render();
 }
 function toggleBradReemb() {
@@ -631,14 +655,69 @@ function toggleBradReemb() {
 function syncBradReembolso() {
   if (!state.bradReembShow) return;
   const plano = document.getElementById('brad-plano')?.value || 'Efetivo';
-  const val = BRAD_REEMBOLSO[plano];
-  const input = document.getElementById('brad-reembolso');
-  if (!input) return;
+  const val   = BRAD_REEMBOLSO[plano];
+  const container = document.getElementById('brad-reemb-container');
+  if (!container) return;
+
   if (Array.isArray(val)) {
-    input.value = val[0].toFixed(2);
-  } else if (val) {
-    input.value = val.toFixed(2);
+    // Troca input por SELECT quando há múltiplos níveis
+    container.innerHTML = `<div class="fg"><label>Nível de Reembolso</label><select id="brad-reembolso" onchange="render()" style="width:100%">
+      ${val.map((v, i) => `<option value="${v}">R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})} — Nível ${i+1}</option>`).join('')}
+    </select></div>`;
+  } else {
+    container.innerHTML = `<div class="fg"><label>Reembolso por consulta (R$)</label><input id="brad-reembolso" type="number" min="0" step="0.01" value="${val ? val.toFixed(2) : ''}" oninput="render()"></div>`;
+    if (val) document.getElementById('brad-reembolso').value = val.toFixed(2);
   }
+  render();
+}
+
+/* ═══════════ PER-PLAN REEMBOLSO SIDEBAR ═══════════ */
+function renderBradPlansReembSection() {
+  const section  = document.getElementById('brad-plans-reemb-section');
+  const toggleRow = document.getElementById('brad-reemb-toggle-row');
+  const singleBox = document.getElementById('brad-reemb-container');
+  if (!section) return;
+
+  if (!state.bradPlans || state.bradPlans.length === 0) {
+    section.style.display = 'none';
+    if (toggleRow) toggleRow.style.display = '';
+    return;
+  }
+
+  // Multi-plan mode: oculta o toggle/input único, mostra seção por plano
+  if (toggleRow) toggleRow.style.display = 'none';
+  if (singleBox) singleBox.style.display  = 'none';
+  section.style.display = '';
+
+  let html = '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px">Reembolso por Plano Bradesco</div>';
+
+  state.bradPlans.forEach((p, i) => {
+    const reembData = BRAD_REEMBOLSO[p.plano];
+    const color = BRAD_COLORS[i] || BRAD_COLORS[0];
+    html += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:8px;border-left:3px solid ${color}">`;
+    html += `<div style="font-size:11px;font-weight:700;color:${color};margin-bottom:8px">● ${esc(p.plano)}${p.acom ? ' · ' + esc(p.acom) : ''}</div>`;
+
+    if (Array.isArray(reembData)) {
+      html += `<div class="fg"><label style="font-size:10px">Nível de Reembolso</label><select id="brad-reemb-${i}" onchange="updatePlanReembolso(${i})" style="width:100%">`;
+      reembData.forEach((v, j) => {
+        const sel = Math.abs((p.reembolso || reembData[0]) - v) < 0.01 ? ' selected' : '';
+        html += `<option value="${v}"${sel}>R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})} — Nível ${j+1}</option>`;
+      });
+      html += `</select></div>`;
+    } else {
+      const cur = (p.reembolso != null && p.reembolso > 0) ? p.reembolso : (reembData || '');
+      html += `<div class="fg"><label style="font-size:10px">Reembolso por consulta (R$)</label><input id="brad-reemb-${i}" type="number" min="0" step="0.01" value="${cur !== '' ? Number(cur).toFixed(2) : ''}" oninput="updatePlanReembolso(${i})" style="width:100%"></div>`;
+    }
+    html += `</div>`;
+  });
+
+  section.innerHTML = html;
+}
+
+function updatePlanReembolso(i) {
+  const el = document.getElementById(`brad-reemb-${i}`);
+  if (!el || !state.bradPlans[i]) return;
+  state.bradPlans[i].reembolso = parseFloat(el.value) || 0;
   render();
 }
 
@@ -709,6 +788,7 @@ function render() {
   html += buildBackCover(d);
   wrap.innerHTML = html;
   applyZoom();
+  renderBradPlansReembSection();
   const gen = ++renderGen;
   setTimeout(() => { if (gen === renderGen) drawCharts(d); }, 60);
 }
@@ -1249,14 +1329,19 @@ function confirmPlanSelection() {
   const planos = document.getElementById('plan-modal')._planos;
   const chosen = [];
   document.querySelectorAll('#modal-plans-list input[type=checkbox]').forEach((cb, i) => {
-    if (cb.checked) chosen.push(planos[i]);
+    if (cb.checked) {
+      const p = { ...planos[i] };
+      // Auto-preenche reembolso da tabela
+      const reembData = BRAD_REEMBOLSO[p.plano];
+      p.reembolso = Array.isArray(reembData) ? reembData[0] : (reembData || 0);
+      chosen.push(p);
+    }
   });
   if (!chosen.length) return;
   closePlanModal();
-  // Salva múltiplos planos no state
   state.bradPlans = chosen;
-  // Preenche formulário com o primeiro plano selecionado
   applyPlanData(chosen[0], _pdfPages);
+  renderBradPlansReembSection();
   render();
 }
 
