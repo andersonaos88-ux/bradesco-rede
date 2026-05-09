@@ -257,6 +257,17 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
   <aside class="sidebar">
     <div class="sidebar-body">
 
+      <!-- ══ TOPO: Importar SPG ══ -->
+      <div class="fsec" style="border-color:rgba(204,0,0,.25);background:rgba(204,0,0,.04)">
+        <div class="stitle" style="color:var(--red)"><span>📄</span> Cotação SPG Bradesco</div>
+        <div class="pdf-upload-box" onclick="document.getElementById('brad-pdf').click()">
+          <div class="pu-title">📄 Importar cotação SPG Bradesco</div>
+          <div class="pu-hint">Preenche os campos automaticamente a partir do PDF</div>
+        </div>
+        <input type="file" id="brad-pdf" accept=".pdf" style="display:none" onchange="handleBradescoFile(this.files[0])">
+        <div id="brad-pdf-status"></div>
+      </div>
+
       <!-- 1. Cliente -->
       <div class="fsec">
         <div class="stitle"><span>🏢</span> Dados do Cliente</div>
@@ -344,15 +355,12 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
         </div>
       </div>
 
-      <!-- 4. Plano Bradesco -->
-      <div class="fsec">
+      <!-- 4a. Planos Bradesco via PDF (multi-plano) — renderizado dinamicamente -->
+      <div id="brad-plans-container"></div>
+
+      <!-- 4b. Plano Bradesco manual (quando não há PDF) -->
+      <div class="fsec" id="brad-manual-section">
         <div class="stitle"><span>🏥</span> Plano Bradesco Saúde</div>
-        <div class="pdf-upload-box" onclick="document.getElementById('brad-pdf').click()">
-          <div class="pu-title">📄 Importar cotação SPG Bradesco (opcional)</div>
-          <div class="pu-hint">Preenche os campos automaticamente a partir do PDF</div>
-        </div>
-        <input type="file" id="brad-pdf" accept=".pdf" style="display:none" onchange="handleBradescoFile(this.files[0])">
-        <div id="brad-pdf-status"></div>
         <div class="row2">
           <div class="fg">
             <label>Nome do Plano</label>
@@ -382,7 +390,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
           </div>
           <div class="fg">
             <label>Valor Mensal (R$)</label>
-            <input id="brad-valor" type="number" min="0" step="0.01" placeholder="15200.00" oninput="state.bradPlans=[];render()">
+            <input id="brad-valor" type="number" min="0" step="0.01" placeholder="15200.00" oninput="render()">
           </div>
         </div>
         <div class="fg">
@@ -399,7 +407,6 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
         <div id="brad-reemb-container" style="display:none">
           <div class="fg"><label>Reembolso por consulta (R$)</label><input id="brad-reembolso" type="number" min="0" step="0.01" oninput="render()"></div>
         </div>
-        <!-- Seção de reembolso por plano (modo multi-plano via PDF modal) -->
         <div id="brad-plans-reemb-section" style="display:none"></div>
       </div>
 
@@ -673,23 +680,67 @@ function syncBradReembolso() {
 
 /* ═══════════ PER-PLAN REEMBOLSO SIDEBAR ═══════════ */
 function renderBradPlansReembSection() {
-  // Reembolso é auto-preenchido da tabela e exibido diretamente no slide.
-  // Sidebar não precisa de seção editável para multi-plano.
-  const section   = document.getElementById('brad-plans-reemb-section');
-  const toggleRow = document.getElementById('brad-reemb-toggle-row');
-  const singleBox = document.getElementById('brad-reemb-container');
-  if (!section) return;
+  const container   = document.getElementById('brad-plans-container');
+  const manualSec   = document.getElementById('brad-manual-section');
+  if (!container) return;
 
-  if (state.bradPlans && state.bradPlans.length > 0) {
-    // Multi-plano: oculta controles manuais de reembolso
-    if (toggleRow) toggleRow.style.display = 'none';
-    if (singleBox) singleBox.style.display  = 'none';
-    section.style.display = 'none';
-  } else {
-    // Modo manual: mostra toggle normal
-    if (toggleRow) toggleRow.style.display = '';
-    section.style.display = 'none';
+  if (!state.bradPlans || state.bradPlans.length === 0) {
+    // Modo manual: mostra seção do formulário, esconde cards de PDF
+    container.innerHTML = '';
+    if (manualSec) manualSec.style.display = '';
+    return;
   }
+
+  // Modo multi-plano: esconde formulário manual, mostra um card por plano
+  if (manualSec) manualSec.style.display = 'none';
+
+  let html = '';
+  state.bradPlans.forEach((p, i) => {
+    const color = BRAD_COLORS[i] || BRAD_COLORS[0];
+    const copLabel = p.cop ? 'Com Coparticipação' : 'Sem Coparticipação';
+    const copClass = p.cop ? 'active-sim' : 'active-nao';
+    html += `
+    <div class="fsec" style="border-color:${color}33;padding-bottom:14px">
+      <div class="stitle" style="color:${color}">
+        <span>🏥</span> Plano Bradesco ${i + 1}
+        <button onclick="removeBradPlan(${i})" title="Remover plano"
+          style="margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px">✕</button>
+      </div>
+      <div style="background:${color}11;border:1.5px solid ${color}33;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:14px;font-weight:800;color:${color}">${esc(p.plano)}${p.acom ? ' · ' + esc(p.acom) : ''}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${fmt(p.valor)} <span style="font-size:10px;color:var(--muted);font-weight:400">/ mês</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <span class="cop-chip ${p.cop ? 'sim' : 'nao'}" style="font-size:10px">${copLabel}</span>
+          ${p.reembolso ? `<span class="reembolso-chip" style="font-size:10px">↩ ${fmt(p.reembolso)}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  // Botão para limpar e voltar ao modo manual
+  html += `
+  <div style="padding:0 0 8px">
+    <button onclick="clearBradPlans()"
+      style="width:100%;padding:8px;border:1px dashed var(--border);border-radius:8px;background:none;
+             cursor:pointer;font-size:11px;color:var(--muted);font-family:inherit;transition:all .15s"
+      onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">
+      ↩ Voltar para preenchimento manual
+    </button>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+function removeBradPlan(i) {
+  state.bradPlans.splice(i, 1);
+  if (state.bradPlans.length === 0) clearBradPlans();
+  else { renderBradPlansReembSection(); render(); }
+}
+
+function clearBradPlans() {
+  state.bradPlans = [];
+  renderBradPlansReembSection();
+  render();
 }
 
 /* ═══════════ SLIDE OPTIONS ═══════════ */
