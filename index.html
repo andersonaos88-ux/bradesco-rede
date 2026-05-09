@@ -315,7 +315,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
           </div>
           <div class="fg">
             <label>Nome do Plano</label>
-            <select id="a-plano" onchange="render()"></select>
+            <select id="a-plano" onchange="syncAtualReembolso();render()"></select>
           </div>
         </div>
         <div class="row2">
@@ -474,6 +474,31 @@ const BRAD_COP = {
   }
 };
 
+// Valores típicos de reembolso por plano (ajuste conforme necessário)
+const ATUAL_REEMBOLSO = {
+  // SulAmérica
+  'Direto Nacional E': 200, 'Direto Nacional Q': 300,
+  'Exato E': 250, 'Exato Q': 350,
+  'Clássico Vital E': 300, 'Clássico Vital Q': 400,
+  'Clássico 100 E': 350, 'Especial 100 Q': 450,
+  'Especial Mais': 500, 'Executivo': 700, 'Prestige': 1000,
+  // Amil
+  'Bronze SP': 150, 'Bronze Mais': 200, 'Prata': 250, 'Ouro': 350, 'Ouro II': 400,
+  'Platinum R1': 500, 'Platinum R2': 600,
+  'S380 E': 380, 'S380 Q': 380, 'S450 E': 450, 'S450 Q': 450,
+  'S750 R1': 750, 'S750 R2': 750, 'S750 R3': 750,
+  'Black I': 1000, 'S2500': 1500, 'Black II': 2000, 'S6500 Black': 3000,
+  // Porto Seguro
+  'Pró ABCDM': 200, 'Prata Pró E': 250, 'Prata Pró Q': 300,
+  'Ouro Pró': 400, 'Diamante Pró': 600,
+  'Bronze Brasil E': 150, 'Bronze Brasil Q': 200,
+  'Prata Mais E': 300, 'Prata Mais Q': 350,
+  'Ouro Mais': 450, 'Ouro Max': 550, 'Diamante Mais': 700,
+  // Hapvida (sem reembolso por padrão)
+  '200 ABC': 0, '200 UP': 0, '300 E': 0, '500 E': 0, '500 Q': 0,
+  '600 E': 0, '600 Q': 0, '700 E': 0, '700 Q': 0,
+};
+
 const BRAD_REEMBOLSO = {
   'Regional': 109.76, 'Saúde +': 109.76, 'Flex': 109.76, 'Ideal': 109.76,
   'Efetivo': 109.76, 'Efetivo Plus': 109.76,
@@ -580,10 +605,20 @@ function setBradCop(v) {
 }
 
 /* ═══════════ REEMBOLSO TOGGLES ═══════════ */
+function syncAtualReembolso() {
+  if (!state.atualReembShow) return;
+  const plano = document.getElementById('a-plano')?.value || '';
+  const field = document.getElementById('a-reembolso');
+  if (!field || field.value) return; // não sobrescreve se já tem valor
+  const val = ATUAL_REEMBOLSO[plano];
+  if (val !== undefined && val > 0) field.value = val.toFixed(2);
+}
+
 function toggleAtualReemb() {
   state.atualReembShow = !state.atualReembShow;
   document.getElementById('rs-atual').checked = state.atualReembShow;
   document.getElementById('a-reemb-container').style.display = state.atualReembShow ? '' : 'none';
+  if (state.atualReembShow) syncAtualReembolso();
   render();
 }
 function toggleBradReemb() {
