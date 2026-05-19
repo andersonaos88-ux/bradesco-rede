@@ -182,6 +182,20 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
 .s-back { width: 960px; height: 540px; background: linear-gradient(135deg, #8B0000, #CC0000); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
 .s-back .bg-geo { position: absolute; right: -80px; bottom: -80px; width: 400px; height: 400px; border-radius: 50%; background: rgba(255,255,255,.05); }
 
+/* REDE CREDENCIADA SLIDE */
+.s-rede { width: 960px; min-height: 540px; background: #fff; padding: 36px 44px 32px; position: relative; }
+.rede-grid { display: grid; gap: 14px; margin-top: 20px; }
+.rede-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.rede-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.rede-city-card { border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+.rede-city-head { padding: 9px 13px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,.06); }
+.rede-city-name { font-size: 12px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 5px; }
+.rede-city-count { font-size: 9px; font-weight: 700; color: var(--muted); background: rgba(0,0,0,.05); padding: 2px 7px; border-radius: 8px; }
+.rede-hosp-list { padding: 8px 13px 10px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.rede-hosp-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rede-hosp-name { font-size: 10.5px; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.3; }
+.rede-plan-badge { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 7px; flex-shrink: 0; white-space: nowrap; letter-spacing: .2px; }
+
 /* slide section header */
 .slide-sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
 .slide-sec-bar { width: 5px; border-radius: 3px; flex-shrink: 0; }
@@ -226,6 +240,24 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
 .btn-confirm { padding: 10px 24px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .15s; }
 .btn-confirm:hover { background: var(--red2); }
 .btn-confirm:disabled { opacity: .4; cursor: not-allowed; }
+.modal-section-hdr {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 4px 6px; font-size: 11px; font-weight: 800;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+  border-top: 1px solid var(--border); margin-top: 4px;
+}
+.modal-section-hdr:first-child { border-top: none; margin-top: 0; padding-top: 2px; }
+/* dual PDF upload */
+.pdf-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pdf-box-small {
+  border: 1.5px dashed rgba(204,0,0,.35); border-radius: 10px;
+  padding: 12px 10px; text-align: center; cursor: pointer; transition: all .15s;
+  background: rgba(204,0,0,.02);
+}
+.pdf-box-small:hover { border-color: var(--red); background: rgba(204,0,0,.06); }
+.pdf-box-small .pb-title { font-size: 11px; font-weight: 800; color: var(--red); }
+.pdf-box-small .pb-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.pdf-status { font-size: 11px; color: var(--muted); min-height: 16px; text-align: center; }
 </style>
 </head>
 <body>
@@ -233,8 +265,8 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
 <!-- ══ MODAL SELEÇÃO DE PLANO ══ -->
 <div class="modal-overlay" id="plan-modal" onclick="if(event.target===this)closePlanModal()">
   <div class="modal-box">
-    <div class="modal-title">📋 Selecione o plano para apresentar</div>
-    <div class="modal-sub">Encontramos os seguintes planos na cotação SPG. Escolha qual deseja usar na comparação:</div>
+    <div class="modal-title">📋 Selecione os planos para apresentar</div>
+    <div class="modal-sub">Planos extraídos das cotações SPG. Selecione quantos quiser — com e sem coparticipação serão exibidos em slides separados.</div>
     <div class="modal-plans" id="modal-plans-list"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closePlanModal()">Cancelar</button>
@@ -261,11 +293,12 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
       <div class="fsec" style="border-color:rgba(204,0,0,.25);background:rgba(204,0,0,.04)">
         <div class="stitle" style="color:var(--red)"><span>📄</span> Cotação SPG Bradesco</div>
         <div class="pdf-upload-box" onclick="document.getElementById('brad-pdf').click()">
-          <div class="pu-title">📄 Importar cotação SPG Bradesco</div>
-          <div class="pu-hint">Preenche os campos automaticamente a partir do PDF</div>
+          <div class="pu-title">📄 Importar cotação(ões) SPG Bradesco</div>
+          <div class="pu-hint">Selecione 1 ou 2 PDFs — com e sem coparticipação</div>
         </div>
-        <input type="file" id="brad-pdf" accept=".pdf" style="display:none" onchange="handleBradescoFile(this.files[0])">
-        <div id="brad-pdf-status"></div>
+        <input type="file" id="brad-pdf" accept=".pdf" multiple style="display:none" onchange="handleBradescoPdfs(this.files)">
+        <div id="brad-pdf-status" class="pdf-status"></div>
+        <button onclick="clearBradPdfs()" id="brad-pdf-clear-btn" style="display:none;width:100%;margin-top:4px;padding:6px;border:1px dashed var(--border);border-radius:7px;background:none;cursor:pointer;font-size:10px;color:var(--muted);font-family:inherit">↩ Limpar PDFs importados</button>
       </div>
 
       <!-- 1. Cliente -->
@@ -283,6 +316,20 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
           <div class="fg">
             <label>Corretor / Consultor</label>
             <input id="consultor" type="text" placeholder="Seu nome" oninput="render()">
+          </div>
+        </div>
+        <!-- Logo do Cliente (dentro de Dados do Cliente) -->
+        <div class="fg" style="margin-top:4px">
+          <label>Logo do cliente <span style="font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <div class="logo-box" id="cliente-logo-box" onclick="document.getElementById('cliente-logo-input').click()" style="margin-top:4px">
+            <div id="cliente-logo-preview-wrap">
+              <div class="ph">📤 Carregar logo do cliente (PNG · JPG · SVG)</div>
+              <div class="ph" style="font-size:10px;margin-top:4px">Aparece na capa da apresentação</div>
+            </div>
+          </div>
+          <input type="file" id="cliente-logo-input" accept="image/*" style="display:none" onchange="handleClienteLogo(this.files[0])">
+          <div id="cliente-logo-remove-wrap" style="display:none;margin-top:6px">
+            <button onclick="removeClienteLogo()" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:11px;color:var(--muted);font-family:inherit">✕ Remover logo do cliente</button>
           </div>
         </div>
       </div>
@@ -309,6 +356,11 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
       <!-- 3. Plano Atual -->
       <div class="fsec">
         <div class="stitle"><span>📋</span> Plano Atual do Cliente</div>
+        <div class="toggle-row" onclick="toggleShowAtual()" style="margin-bottom:14px">
+          <input type="checkbox" id="opt-atual-check" checked onclick="event.stopPropagation();toggleShowAtual()">
+          <label for="opt-atual-check" onclick="event.stopPropagation();event.preventDefault();toggleShowAtual()">Incluir plano atual na apresentação</label>
+        </div>
+        <div id="atual-fields-wrap">
         <div class="row2">
           <div class="fg">
             <label>Operadora</label>
@@ -353,6 +405,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
         <div id="a-reemb-container" style="display:none">
           <div class="fg"><label>Reembolso por consulta (R$)</label><input id="a-reembolso" type="number" min="0" step="0.01" placeholder="200.00" oninput="render()"></div>
         </div>
+        </div><!-- /atual-fields-wrap -->
       </div>
 
       <!-- 4a. Planos Bradesco via PDF (multi-plano) — renderizado dinamicamente -->
@@ -408,6 +461,13 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
           <div class="fg"><label>Reembolso por consulta (R$)</label><input id="brad-reembolso" type="number" min="0" step="0.01" oninput="render()"></div>
         </div>
         <div id="brad-plans-reemb-section" style="display:none"></div>
+        <button id="brad-add-manual-btn" onclick="addManualBradPlan()"
+          style="width:100%;margin-top:8px;padding:9px;border:1.5px dashed var(--primary);border-radius:8px;
+                 background:none;cursor:pointer;font-size:13px;font-weight:700;color:var(--primary);
+                 font-family:inherit;transition:all .15s"
+          onmouseover="this.style.background='rgba(180,0,0,.05)'" onmouseout="this.style.background='none'">
+          ➕ Adicionar plano à apresentação
+        </button>
       </div>
 
       <!-- 5. Slides opcionais -->
@@ -424,6 +484,24 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
         <div class="check-opt" onclick="toggleOpt('diff')">
           <input type="checkbox" id="opt-diff" checked onclick="event.stopPropagation();toggleOpt('diff')">
           <label for="opt-diff">Diferenciais Bradesco Saúde</label>
+        </div>
+        <div class="check-opt" onclick="toggleOpt('rede')">
+          <input type="checkbox" id="opt-rede" onclick="event.stopPropagation();toggleOpt('rede')">
+          <label for="opt-rede">Resumo de Rede Credenciada</label>
+        </div>
+        <div id="rede-regioes-wrap" style="display:none;padding:4px 0 0 10px">
+          <div class="check-opt" style="margin-bottom:5px;border-color:rgba(204,0,0,.2)" onclick="toggleRede('ABCDM')">
+            <input type="checkbox" id="opt-rede-abcdm" checked onclick="event.stopPropagation();toggleRede('ABCDM')">
+            <label for="opt-rede-abcdm" style="font-size:11px">📍 Região ABCDM</label>
+          </div>
+          <div class="check-opt" style="margin-bottom:5px;border-color:rgba(204,0,0,.2)" onclick="toggleRede('SP Capital')">
+            <input type="checkbox" id="opt-rede-spcap" checked onclick="event.stopPropagation();toggleRede('SP Capital')">
+            <label for="opt-rede-spcap" style="font-size:11px">📍 São Paulo Capital</label>
+          </div>
+          <div class="check-opt" style="border-color:rgba(204,0,0,.2)" onclick="toggleRede('Interior')">
+            <input type="checkbox" id="opt-rede-int" checked onclick="event.stopPropagation();toggleRede('Interior')">
+            <label for="opt-rede-int" style="font-size:11px">📍 Interior de SP</label>
+          </div>
         </div>
       </div>
 
@@ -494,7 +572,7 @@ const REEMBOLSO_DATA = {
   sulamerica: {
     'Direto Nacional E': 90.00, 'Direto Nacional Q': 90.00,
     'Clássico Vital E': 110.25, 'Clássico Vital Q': 110.25,
-    'Clássico 100 E': 110.25, 'Especial 100 Q': 150.30,
+    'Clássico 100 E': 110.25, 'Especial 100 Q': 180.00,
     'Especial Mais Vital': 330.75, 'Especial Mais': 330.75,
     'Executivo': [500.00, 660.00, 880.00],
     'Prestige': 1000.00,
@@ -520,6 +598,11 @@ const REEMBOLSO_DATA = {
 
 // Atalhos por seguradora para uso interno
 const BRAD_REEMBOLSO = REEMBOLSO_DATA.bradesco;
+// Sufixos de variação de reembolso (mais barato → mais caro)
+const BRAD_REEMBOLSO_SUFFIX = {
+  'Nacional':     ['1x', '2x', '3x'],
+  'Nacional Plus': ['4x', '6x', '8x'],
+};
 // Helper para plano atual
 function getAtualReembolso(seg, plano) { return REEMBOLSO_DATA[seg]?.[plano]; }
 
@@ -544,9 +627,147 @@ const BRAD_DIFFS = [
   { icon: '💰', title: 'Reembolso', desc: 'Flexibilidade para consultar qualquer médico fora da rede com reembolso parcial garantido.' },
 ];
 
+/* ═══════════ REDE CREDENCIADA DATA ═══════════ */
+const PLAN_BADGE = {
+  'Ef':  { label: 'Efetivo',   bg: '#DBEAFE', color: '#1D4ED8' },
+  'EP':  { label: 'Ef. Plus',  bg: '#EDE9FE', color: '#6D28D9' },
+  'Fx':  { label: 'Flex',      bg: '#D1FAE5', color: '#047857' },
+  'Id':  { label: 'Ideal',     bg: '#CCFBF1', color: '#0F766E' },
+  'N':   { label: 'Nacional',  bg: '#FEF3C7', color: '#B45309' },
+  'NP':  { label: 'Nac. Plus', bg: '#FEE2E2', color: '#B91C1C' },
+};
+
+const REDE_DATA = {
+  'ABCDM': {
+    label: 'Região ABCDM',
+    subtitulo: 'Santo André · São Bernardo do Campo · São Caetano do Sul · Diadema · Mauá · Ribeirão Pires',
+    cidades: [
+      { nome: 'Santo André', hospitais: [
+        { nome: 'Hosp. Ben. Portuguesa de Sto. André', min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'IRC Inst. Regeneração Celular',       min: 'Ef', tipo: 'H DIA' },
+        { nome: 'Hospital e Maternidade Brasil',       min: 'EP', tipo: 'H/P.S/M' },
+        { nome: 'Hospital Bartira',                    min: 'EP', tipo: 'H/P.S/A' },
+        { nome: 'Hosp. Mat. Dr. Christóvão Gama',     min: 'Fx', tipo: 'H/P.S/M/A' },
+      ]},
+      { nome: 'São Bernardo\ndo Campo', hospitais: [
+        { nome: 'Hospital São Bernardo',               min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Ctro. Trat. Bezerra de Menezes',      min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hosp. Neomater Santa Marcelina',      min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hospital IFOR',                       min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hosp. São Luiz - São Bernardo',       min: 'EP', tipo: 'H/P.S' },
+        { nome: 'Clínica Especializada Vaad',          min: 'N',  tipo: 'H' },
+      ]},
+      { nome: 'São Caetano\ndo Sul', hospitais: [
+        { nome: 'Soc. Portuguesa Beneficência',        min: 'Ef', tipo: 'H/P.S/M/A' },
+        { nome: 'Hospital e Mat. Central',             min: 'Fx', tipo: 'H/P.S' },
+        { nome: 'Hospital São Luiz São Caetano',       min: 'Fx', tipo: 'H/P.S/M/A' },
+      ]},
+      { nome: 'Diadema', hospitais: [
+        { nome: 'Innova Hospitais',                    min: 'Ef', tipo: 'H/P.S/A' },
+      ]},
+      { nome: 'Mauá', hospitais: [
+        { nome: 'Santa Casa de Mauá',                  min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hosp. e Mat. Brasil - Mauá',          min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hosp. e Maternidade América',         min: 'Fx', tipo: 'H/P.S/M/A' },
+      ]},
+      { nome: 'Ribeirão Pires', hospitais: [
+        { nome: 'Hospital Ribeirão Pires',             min: 'EP', tipo: 'H/P.S/M/A' },
+      ]},
+    ],
+  },
+  'SP Capital': {
+    label: 'São Paulo Capital',
+    subtitulo: 'Principais hospitais credenciados na capital',
+    cidades: [
+      { nome: 'São Paulo', hospitais: [
+        { nome: 'Hospital Santa Marcelina',      min: 'Ef', tipo: 'H/P.S/M' },
+        { nome: 'H. e Mat. Santa Maria',         min: 'Ef', tipo: 'H/P.S/M' },
+        { nome: 'Hospital São Camilo Pompeia',   min: 'Ef', tipo: 'H/P.S' },
+        { nome: 'Hospital São Camilo Santana',   min: 'Ef', tipo: 'H/P.S' },
+        { nome: 'Hospital Nipo Brasileiro',      min: 'Ef', tipo: 'H/P.S/M' },
+        { nome: 'Hospital Moriah',               min: 'Ef', tipo: 'H/P.S' },
+        { nome: 'Cruz Azul',                     min: 'Ef', tipo: 'H/P.S' },
+        { nome: 'Hospital Santa Isabel',         min: 'Ef', tipo: 'H/P.S' },
+        { nome: 'IBCC',                          min: 'Ef', tipo: 'H' },
+        { nome: 'Hospital das Clínicas (HC)',    min: 'EP', tipo: 'H/P.S/A' },
+        { nome: 'Hospital Leforte Liberdade',    min: 'EP', tipo: 'H/P.S' },
+        { nome: 'Instituto do Coração INCOR',   min: 'EP', tipo: 'H/P.S' },
+        { nome: 'Hospital São Paulo (HSANP)',    min: 'Fx', tipo: 'H/P.S/M' },
+        { nome: 'Hospital Santa Paula',          min: 'Fx', tipo: 'H/P.S' },
+        { nome: 'Hospital 9 de Julho',           min: 'Id', tipo: 'H/P.S' },
+        { nome: 'Hospital Paulistano',           min: 'Id', tipo: 'H/P.S' },
+        { nome: 'AC Camargo Cancer Center',      min: 'Id', tipo: 'H' },
+        { nome: 'Hospital Independência ZL',     min: 'Id', tipo: 'H/P.S' },
+        { nome: 'Hospital Adventista SP',        min: 'N',  tipo: 'H/P.S' },
+        { nome: 'Hospital São Camilo Ipiranga',  min: 'N',  tipo: 'H/P.S' },
+        { nome: 'Hospital Albert Einstein',      min: 'NP', tipo: 'H/P.S/M/A' },
+        { nome: 'Hospital Sírio-Libanês',        min: 'NP', tipo: 'H/P.S' },
+        { nome: 'Hospital Samaritano SP',        min: 'NP', tipo: 'H/P.S/M' },
+      ]},
+    ],
+  },
+  'Interior': {
+    label: 'Interior de SP',
+    subtitulo: 'Guarulhos · Campinas · S. J. dos Campos · Indaiatuba · Atibaia · Bragança Paulista',
+    cidades: [
+      { nome: 'Guarulhos', hospitais: [
+        { nome: 'Hospital Carlos Chagas',            min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hospital Carlos Chagas',            min: 'Ef', tipo: 'H/P.S/M/A' },
+        { nome: 'Hospital Stella Maris',             min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hospital São Luiz Guarulhos',       min: 'EP', tipo: 'H/P.S/M/A' },
+      ]},
+      { nome: 'Campinas', hospitais: [
+        { nome: 'Centro Infantil Boldrini',          min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Casa de Saúde',                     min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hospital Vera Cruz',                min: 'Ef', tipo: 'H/M' },
+        { nome: 'Hosp. EV Samaritano Campinas',      min: 'Fx', tipo: 'H/P.S/M' },
+        { nome: 'Coração de Campinas',               min: 'Fx', tipo: 'H/A' },
+        { nome: 'Hospital Santa Tereza',             min: 'Fx', tipo: 'H/P.S/M/A' },
+        { nome: 'Hosp. e Mat. Celso Pierro',         min: 'Fx', tipo: 'H/P.S/M/A' },
+        { nome: 'Irmandade Misericórdia',            min: 'Fx', tipo: 'H/A' },
+        { nome: 'Hospital Radium',                   min: 'Fx', tipo: 'H DIA' },
+        { nome: 'Hospital Madre Theodora',           min: 'Fx', tipo: 'H/P.S/A' },
+        { nome: 'Hospital São Luiz Campinas',        min: 'Id', tipo: 'H/M/A' },
+        { nome: 'Hospital São Luiz Campinas',        min: 'Id', tipo: 'H/P.S/M/A' },
+        { nome: 'Maternidade de Campinas',           min: 'N',  tipo: 'H/P.S/M/A' },
+        { nome: 'Campinas Day Hospital',             min: 'N',  tipo: 'H/A' },
+        { nome: 'Fund. Centro Médico Campinas',      min: 'N',  tipo: 'H/P.S/A' },
+        { nome: 'Hospital Renascença Campinas',      min: 'N',  tipo: 'H/P.S/M/A' },
+      ]},
+      { nome: 'S. J. dos\nCampos', hospitais: [
+        { nome: 'Clínica Pró-Infância',              min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hosp. Mat. Antoninho da Rocha M.',  min: 'Ef', tipo: 'H/M/A' },
+        { nome: 'CTFM / GACC',                       min: 'Ef', tipo: 'H/A' },
+        { nome: 'Hospital Prontil',                  min: 'Ef', tipo: 'H/P.S/A' },
+        { nome: 'Hospital São José',                 min: 'Ef', tipo: 'H/P.S' },
+        { nome: 'Assoc. Inst. Chui Psiquiatria',     min: 'Ef', tipo: 'H/A' },
+        { nome: 'Hospital Orto',                     min: 'Fx', tipo: 'H/P.S/A' },
+        { nome: 'Orthoservice',                      min: 'Fx', tipo: 'H/P.S/A' },
+        { nome: 'Hospital Francisca Júlia',          min: 'Fx', tipo: 'H/A' },
+        { nome: 'Hosp. e Mat. Pio XII',              min: 'Fx', tipo: 'H/P.S' },
+        { nome: 'Hospital Policlin',                 min: 'Fx', tipo: 'H/P.S/M' },
+        { nome: 'Santa Casa S. J. dos Campos',       min: 'Fx', tipo: 'H/P.S/M/A' },
+        { nome: 'Hospital Vivalle',                  min: 'Id', tipo: 'H/M' },
+      ]},
+      { nome: 'Indaiatuba', hospitais: [
+        { nome: 'Hospital Santa Inês',               min: 'Ef', tipo: 'H/P.S/M' },
+      ]},
+      { nome: 'Atibaia', hospitais: [
+        { nome: 'Hospital Albert Sabin',             min: 'Fx', tipo: 'H/P.S' },
+        { nome: 'Hospital Novo Atibaia',             min: 'N',  tipo: 'H/P.S/M' },
+      ]},
+      { nome: 'Bragança\nPaulista', hospitais: [
+        { nome: 'Hospital Univ. São Francisco',      min: 'Ef', tipo: 'H/P.S/M/A' },
+        { nome: 'Santa Casa Bragança Paulista',      min: 'Ef', tipo: 'H/P.S' },
+      ]},
+    ],
+  },
+};
+
 /* ═══════════ STATE ═══════════ */
 let state = {
   logoUrl: null,
+  clienteLogoUrl: null,
   copAtual: false,
   copBrad: true,
   atualReembShow: false,
@@ -554,7 +775,10 @@ let state = {
   showCop: true,
   showWait: true,
   showDiff: true,
+  showAtual: true,   // checkbox "incluir plano atual na apresentação"
   bradPlans: [], // planos selecionados no modal PDF (múltiplos)
+  showRede: false,
+  redeRegioes: { 'ABCDM': true, 'SP Capital': true, 'Interior': true },
 };
 let charts = [];
 let renderGen = 0;
@@ -565,6 +789,13 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('mesano').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   syncAtualPlanOpts();
   render();
+
+  // Pré-preenche o campo Corretor/Consultor com o nome do usuário logado
+  const ctNome = document.cookie.match(/(?:^|;\s*)ct_nome=([^;]+)/);
+  if (ctNome) {
+    const el = document.getElementById('consultor');
+    if (el && !el.value) { el.value = decodeURIComponent(ctNome[1]); render(); }
+  }
 });
 
 /* ═══════════ LOGO ═══════════ */
@@ -585,6 +816,36 @@ function removeLogo() {
   document.getElementById('logo-preview-wrap').innerHTML = '<div class="ph">📤 Carregar logo (PNG · JPG · SVG)</div><div class="ph" style="font-size:10px;margin-top:4px">Aparece na capa e contracapa</div>';
   document.getElementById('logo-remove-wrap').style.display = 'none';
   document.getElementById('logo-input').value = '';
+  render();
+}
+
+/* ═══════════ LOGO DO CLIENTE ═══════════ */
+function handleClienteLogo(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.clienteLogoUrl = e.target.result;
+    const wrap = document.getElementById('cliente-logo-preview-wrap');
+    wrap.innerHTML = `<img src="${state.clienteLogoUrl}" style="max-height:50px;max-width:180px;object-fit:contain">`;
+    document.getElementById('cliente-logo-remove-wrap').style.display = '';
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+function removeClienteLogo() {
+  state.clienteLogoUrl = null;
+  document.getElementById('cliente-logo-preview-wrap').innerHTML = '<div class="ph">📤 Carregar logo do cliente (PNG · JPG · SVG)</div><div class="ph" style="font-size:10px;margin-top:4px">Aparece na capa da apresentação</div>';
+  document.getElementById('cliente-logo-remove-wrap').style.display = 'none';
+  document.getElementById('cliente-logo-input').value = '';
+  render();
+}
+
+/* ═══════════ TOGGLE PLANO ATUAL ═══════════ */
+function toggleShowAtual() {
+  state.showAtual = !state.showAtual;
+  document.getElementById('opt-atual-check').checked = state.showAtual;
+  const wrap = document.getElementById('atual-fields-wrap');
+  if (wrap) wrap.style.opacity = state.showAtual ? '1' : '0.4';
   render();
 }
 
@@ -688,14 +949,21 @@ function renderBradPlansReembSection() {
   if (!container) return;
 
   if (!state.bradPlans || state.bradPlans.length === 0) {
-    // Modo manual: mostra seção do formulário, esconde cards de PDF
     container.innerHTML = '';
-    if (manualSec) manualSec.style.display = '';
+    if (manualSec) {
+      manualSec.style.display = '';
+      const t = manualSec.querySelector('.stitle');
+      if (t) t.innerHTML = '<span>🏥</span> Plano Bradesco Saúde';
+    }
     return;
   }
 
-  // Modo multi-plano: esconde formulário manual, mostra um card por plano
-  if (manualSec) manualSec.style.display = 'none';
+  // Multi-plano: mantém o formulário visível mas muda o título
+  if (manualSec) {
+    manualSec.style.display = '';
+    const t = manualSec.querySelector('.stitle');
+    if (t) t.innerHTML = '<span>➕</span> Adicionar outro plano Bradesco';
+  }
 
   let html = '';
   state.bradPlans.forEach((p, i) => {
@@ -720,14 +988,13 @@ function renderBradPlansReembSection() {
     </div>`;
   });
 
-  // Botão para limpar e voltar ao modo manual
   html += `
   <div style="padding:0 0 8px">
     <button onclick="clearBradPlans()"
       style="width:100%;padding:8px;border:1px dashed var(--border);border-radius:8px;background:none;
              cursor:pointer;font-size:11px;color:var(--muted);font-family:inherit;transition:all .15s"
       onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">
-      ↩ Voltar para preenchimento manual
+      ✕ Limpar todos os planos
     </button>
   </div>`;
 
@@ -746,15 +1013,62 @@ function clearBradPlans() {
   render();
 }
 
+function addManualBradPlan() {
+  const plano = document.getElementById('brad-plano')?.value || 'Efetivo';
+  const acom  = document.getElementById('brad-acom')?.value  || 'Apartamento';
+  const vidas = parseInt(document.getElementById('brad-vidas')?.value) || 1;
+  const valor = parseFloat(document.getElementById('brad-valor')?.value) || 0;
+  const cop   = state.copBrad === true;
+
+  const suffixes = BRAD_REEMBOLSO_SUFFIX[plano];
+  let reembolso = 0;
+  if (state.bradReembShow) {
+    reembolso = parseFloat(document.getElementById('brad-reembolso')?.value) || 0;
+  } else if (suffixes) {
+    const same = state.bradPlans.filter(p => p.plano === plano && p.cop === cop);
+    const rank = same.length;
+    reembolso  = BRAD_REEMBOLSO[plano][Math.min(rank, suffixes.length - 1)];
+  } else {
+    const rd = BRAD_REEMBOLSO[plano];
+    reembolso = Array.isArray(rd) ? rd[0] : (rd || 0);
+  }
+
+  let label = null;
+  if (suffixes) {
+    const same = state.bradPlans.filter(p => p.plano === plano && p.cop === cop);
+    const rank = same.length;
+    label = `${plano} ${suffixes[Math.min(rank, suffixes.length - 1)]}`;
+  }
+
+  state.bradPlans.push({ plano, acom, vidas, valor, cop, reembolso, label });
+  renderBradPlansReembSection();
+  render();
+}
+
 /* ═══════════ SLIDE OPTIONS ═══════════ */
 function toggleOpt(key) {
-  const map = { cop: 'showCop', wait: 'showWait', diff: 'showDiff' };
+  const map = { cop: 'showCop', wait: 'showWait', diff: 'showDiff', rede: 'showRede' };
   state[map[key]] = !state[map[key]];
   document.getElementById(`opt-${key}`).checked = state[map[key]];
+  if (key === 'rede') {
+    const wrap = document.getElementById('rede-regioes-wrap');
+    if (wrap) wrap.style.display = state.showRede ? '' : 'none';
+  }
+  render();
+}
+
+function toggleRede(regiao) {
+  state.redeRegioes[regiao] = !state.redeRegioes[regiao];
+  const keyMap = { 'ABCDM': 'abcdm', 'SP Capital': 'spcap', 'Interior': 'int' };
+  const el = document.getElementById(`opt-rede-${keyMap[regiao]}`);
+  if (el) el.checked = state.redeRegioes[regiao];
   render();
 }
 
 /* ═══════════ COLLECT DATA ═══════════ */
+const IOF_RATE = 1.0238; // IOF 2,38%
+function withIof(v) { return Math.round((v || 0) * IOF_RATE * 100) / 100; }
+
 function getData() {
   const mv = document.getElementById('mesano').value;
   let label = '';
@@ -763,17 +1077,33 @@ function getData() {
     const M = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     label = `${M[+m-1]}/${y}`;
   }
+  const atualValorRaw = parseFloat(document.getElementById('a-valor')?.value) || 0;
+  const bradValorRaw  = parseFloat(document.getElementById('brad-valor')?.value) || 0;
+
+  // Planos Bradesco com IOF aplicado
+  const rawBradPlans = state.bradPlans.length > 0 ? state.bradPlans : [{
+    plano:  document.getElementById('brad-plano')?.value || 'Efetivo',
+    acom:   document.getElementById('brad-acom')?.value || 'Apartamento',
+    valor:  bradValorRaw,
+    cop:    state.copBrad,
+    reembolso: state.bradReembShow ? (parseFloat(document.getElementById('brad-reembolso')?.value) || 0) : 0,
+    label:  (document.getElementById('brad-plano')?.value || 'Efetivo') + ' ' + (document.getElementById('brad-acom')?.value || 'Apartamento'),
+  }];
+  const bradPlans = rawBradPlans.map(p => ({ ...p, valor: withIof(p.valor) }));
+
   return {
-    empresa:   document.getElementById('empresa').value.trim() || 'Nome da Empresa',
-    mesano:    label || 'Mês/Ano',
-    consultor: document.getElementById('consultor').value.trim(),
-    logoUrl:   state.logoUrl,
-    nomeCorretora: document.getElementById('nome-corretora')?.value.trim() || '',
+    empresa:        document.getElementById('empresa').value.trim() || 'Nome da Empresa',
+    mesano:         label || 'Mês/Ano',
+    consultor:      document.getElementById('consultor').value.trim(),
+    logoUrl:        state.logoUrl,
+    clienteLogoUrl: state.clienteLogoUrl,
+    nomeCorretora:  document.getElementById('nome-corretora')?.value.trim() || '',
+    showAtual:      state.showAtual,
     atual: {
       seg:      document.getElementById('a-seg')?.value || 'sulamerica',
       plano:    document.getElementById('a-plano')?.value || '—',
       vidas:    parseInt(document.getElementById('a-vidas')?.value) || 1,
-      valor:    parseFloat(document.getElementById('a-valor')?.value) || 0,
+      valor:    atualValorRaw,
       cop:      state.copAtual,
       reembolso: state.atualReembShow ? (parseFloat(document.getElementById('a-reembolso')?.value) || 0) : 0,
     },
@@ -781,22 +1111,16 @@ function getData() {
       plano:    document.getElementById('brad-plano')?.value || 'Efetivo',
       acom:     document.getElementById('brad-acom')?.value || 'Apartamento',
       vidas:    parseInt(document.getElementById('brad-vidas')?.value) || 1,
-      valor:    parseFloat(document.getElementById('brad-valor')?.value) || 0,
+      valor:    withIof(bradValorRaw),
       cop:      state.copBrad,
       reembolso: state.bradReembShow ? (parseFloat(document.getElementById('brad-reembolso')?.value) || 0) : 0,
     },
-    // Se vieram do modal PDF, usa lista múltipla; senão cria lista com o plano do formulário
-    bradPlans: state.bradPlans.length > 0 ? state.bradPlans : [{
-      plano:  document.getElementById('brad-plano')?.value || 'Efetivo',
-      acom:   document.getElementById('brad-acom')?.value || 'Apartamento',
-      valor:  parseFloat(document.getElementById('brad-valor')?.value) || 0,
-      cop:    state.copBrad,
-      reembolso: state.bradReembShow ? (parseFloat(document.getElementById('brad-reembolso')?.value) || 0) : 0,
-      label:  (document.getElementById('brad-plano')?.value || 'Efetivo') + ' ' + (document.getElementById('brad-acom')?.value || 'Apartamento'),
-    }],
-    showCop:  state.showCop,
-    showWait: state.showWait,
-    showDiff: state.showDiff,
+    bradPlans,
+    showCop:     state.showCop,
+    showWait:    state.showWait,
+    showDiff:    state.showDiff,
+    showRede:    state.showRede,
+    redeRegioes: state.redeRegioes,
   };
 }
 
@@ -810,6 +1134,11 @@ function render() {
   if (d.showCop && d.bradPlans.some(p => p.cop)) html += buildCopSlide(d);
   if (d.showWait) html += buildCarenciaSlide(d);
   if (d.showDiff) html += buildDiffSlide(d);
+  if (d.showRede) {
+    ['ABCDM', 'SP Capital', 'Interior'].forEach(r => {
+      if (d.redeRegioes[r]) html += buildRedeSlide(d, r);
+    });
+  }
   html += buildBackCover(d);
   wrap.innerHTML = html;
   applyZoom();
@@ -831,11 +1160,17 @@ window.addEventListener('resize', applyZoom);
 
 /* ═══════════ SLIDE: CAPA ═══════════ */
 function buildCover(d) {
-  const logoHtml = d.logoUrl
-    ? `<img src="${d.logoUrl}" style="max-height:48px;max-width:190px;object-fit:contain">`
+  const corretoraHtml = d.logoUrl
+    ? `<img src="${d.logoUrl}" style="max-height:44px;max-width:160px;object-fit:contain">`
     : d.nomeCorretora
       ? `<div class="logo-placeholder">${esc(d.nomeCorretora)}</div>`
       : `<div class="logo-placeholder">CORRETORA</div>`;
+  const clienteHtml = d.clienteLogoUrl
+    ? `<div style="background:rgba(255,255,255,.92);border-radius:7px;padding:5px 12px;display:flex;align-items:center"><img src="${d.clienteLogoUrl}" style="max-height:36px;max-width:130px;object-fit:contain"></div>`
+    : '';
+  const logoHtml = clienteHtml
+    ? `${corretoraHtml}<div style="width:1px;height:36px;background:rgba(255,255,255,.3);margin:0 6px"></div>${clienteHtml}`
+    : corretoraHtml;
   return `
   <div class="slide-box" id="sl-cover">
     <div class="s-cover">
@@ -857,11 +1192,35 @@ function buildCover(d) {
 const BRAD_COLORS = ['#CC0000','#E53935','#FF6B6B','#FF9999','#FFB3B3','#CC6666'];
 
 function buildComp(d) {
+  const copPlans   = d.bradPlans.filter(p => p.cop);
+  const nocopPlans = d.bradPlans.filter(p => !p.cop);
+
+  // Se há planos de ambos os tipos → dois slides separados
+  if (copPlans.length && nocopPlans.length) {
+    return buildCompSlide(d, copPlans,   'cop',   true) +
+           buildCompSlide(d, nocopPlans, 'nocop', false);
+  }
+  // Caso contrário, slide único (pode ser cop, nocop ou manual)
+  return buildCompSlide(d, d.bradPlans, 'main', d.bradPlans.length ? d.bradPlans[0].cop : null);
+}
+
+function buildCompSlide(d, plans, suffix, copFlag) {
   const atualIns = INS[d.atual.seg] || INS.outro;
-  const vidas = d.brad.vidas;
-  const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
-  // Cards de cada plano Bradesco
-  const bradCards = d.bradPlans.map((p, i) => {
+  const vidas    = d.brad.vidas;
+  const logoWm   = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
+  const showAtual = d.showAtual;
+
+  const isSplit = (suffix === 'cop' || suffix === 'nocop');
+  let copBadge = '';
+  if (isSplit) {
+    copBadge = copFlag
+      ? `<span style="display:inline-block;background:#dcfce7;color:#15803d;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-left:10px;vertical-align:middle">✔ Com Coparticipação</span>`
+      : `<span style="display:inline-block;background:#fee2e2;color:#b91c1c;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-left:10px;vertical-align:middle">✕ Sem Coparticipação</span>`;
+  }
+  const title = (showAtual ? 'Por que migrar para a <em>Bradesco Saúde?</em>' : 'Proposta <em>Bradesco Saúde</em>') + copBadge;
+
+  // Cards das barras
+  const bradCards = plans.map((p, i) => {
     const ganhoMensal = d.atual.valor - p.valor;
     const ganhoAnual  = ganhoMensal * 12;
     const ganhoClass  = ganhoAnual > 200 ? 'positivo' : ganhoAnual < -200 ? 'negativo' : 'neutro';
@@ -871,29 +1230,22 @@ function buildComp(d) {
     return `
     <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 6px">
       <div style="width:10px;height:10px;border-radius:50%;background:${color};margin-bottom:2px"></div>
-      <div style="font-size:10px;font-weight:800;color:${color};text-align:center;line-height:1.2">${esc(p.plano)}</div>
+      <div style="font-size:10px;font-weight:800;color:${color};text-align:center;line-height:1.2">${esc(p.label||p.plano)}</div>
       ${p.acom ? `<div style="font-size:9px;color:var(--muted)">${esc(p.acom)}</div>` : ''}
-      <span class="cop-chip ${p.cop ? 'sim' : 'nao'}" style="font-size:8px">${p.cop ? 'Com Cop.' : 'Sem Cop.'}</span>
       <div style="font-size:9px;color:var(--muted)">${vidas} vida${vidas !== 1 ? 's' : ''}</div>
       ${p.reembolso ? `<span class="reembolso-chip" style="font-size:8px">↩ ${fmt(p.reembolso)}</span>` : ''}
-      ${d.atual.valor > 0 && p.valor > 0 ? `
+      ${showAtual && d.atual.valor > 0 && p.valor > 0 ? `
         <span class="ganho-chip ${ganhoClass}" style="font-size:9px;margin-top:4px;white-space:nowrap">${ganhoIcon} ${ganhoLabel}</span>
         <div style="font-size:8px;color:var(--muted);white-space:nowrap">${fmt(Math.abs(ganhoAnual))}/ano</div>
       ` : ''}
     </div>`;
   }).join(`<div style="width:1px;background:var(--border);margin:0 4px;align-self:stretch"></div>`);
 
-  return `
-  <div class="slide-box" id="sl-comp">
-    <div class="s-comp">
-      ${logoWm}
-      <div class="s-title">Por que migrar para a <em>Bradesco Saúde?</em></div>
-      <div style="display:flex;gap:0;align-items:stretch">
-        <!-- Atual -->
+  const atualColHtml = showAtual ? `
         <div style="width:180px;flex-shrink:0;display:flex;flex-direction:column;align-items:center">
           <div class="col-label">Plano Atual</div>
           <span class="ins-tag" style="border-color:${atualIns.color};color:${atualIns.color};margin-bottom:8px">${atualIns.label}</span>
-          <div class="chart-wrap" style="width:100%"><canvas id="ch-atual"></canvas></div>
+          <div class="chart-wrap" style="width:100%"><canvas id="ch-atual-${suffix}"></canvas></div>
           <div class="plan-meta">
             <span class="plan-name-label" style="color:${atualIns.color}">${esc(d.atual.plano)}</span>
             <span class="cop-chip ${d.atual.cop ? 'sim' : 'nao'}">${d.atual.cop ? 'Com Cop.' : 'Sem Cop.'}</span>
@@ -901,13 +1253,23 @@ function buildComp(d) {
             ${d.atual.reembolso ? `<span class="reembolso-chip">↩ ${fmt(d.atual.reembolso)}</span>` : ''}
           </div>
         </div>
-        <div class="vert-sep"></div>
-        <!-- Bradesco — canvas multi-barras -->
+        <div class="vert-sep"></div>` : '';
+
+  const legendaAtualHtml = showAtual
+    ? `<div class="leg-item"><div class="leg-dot" style="background:${atualIns.color}"></div>${atualIns.label} — Plano atual</div>`
+    : '';
+
+  return `
+  <div class="slide-box" id="sl-comp-${suffix}">
+    <div class="s-comp">
+      ${logoWm}
+      <div class="s-title">${title}</div>
+      <div style="display:flex;gap:0;align-items:stretch">
+        ${atualColHtml}
         <div style="flex:1;display:flex;flex-direction:column">
           <div class="col-label" style="color:var(--red);text-align:center">Bradesco Saúde</div>
           <span class="ins-tag" style="border-color:var(--red);color:var(--red);display:block;text-align:center;margin-bottom:8px">Bradesco</span>
-          <div class="chart-wrap" style="flex:1"><canvas id="ch-brad"></canvas></div>
-          <!-- Metadados dos planos -->
+          <div class="chart-wrap" style="flex:1"><canvas id="ch-brad-${suffix}"></canvas></div>
           <div style="display:flex;justify-content:space-around;padding-top:8px;margin-top:4px;border-top:1px solid var(--border)">
             ${bradCards}
           </div>
@@ -915,9 +1277,10 @@ function buildComp(d) {
       </div>
       <div class="divider"></div>
       <div class="legend-row">
-        <div class="leg-item"><div class="leg-dot" style="background:${atualIns.color}"></div>${atualIns.label} — Plano atual</div>
-        ${d.bradPlans.map((p,i) => `<div class="leg-item"><div class="leg-dot" style="background:${BRAD_COLORS[i]||BRAD_COLORS[0]}"></div>${esc(p.label||p.plano)}</div>`).join('')}
+        ${legendaAtualHtml}
+        ${plans.map((p,i) => `<div class="leg-item"><div class="leg-dot" style="background:${BRAD_COLORS[i]||BRAD_COLORS[0]}"></div>${esc(p.label||p.plano)}</div>`).join('')}
       </div>
+      <div style="text-align:right;font-size:9px;color:var(--muted);margin-top:6px">* Valores incluem IOF de 2,38%</div>
     </div>
   </div>`;
 }
@@ -1047,10 +1410,124 @@ function buildDiffSlide(d) {
   </div>`;
 }
 
+/* ═══════════ SLIDE: REDE CREDENCIADA ═══════════ */
+function buildRedeSlide(d, regiaoKey) {
+  const logoWm = d.logoUrl ? `<img src="${d.logoUrl}" class="slide-logo-wm">` : '';
+  const regiao = REDE_DATA[regiaoKey];
+  if (!regiao) return '';
+
+  const PLAN_COLS = [
+    { key: 'Ef',  label: 'EFETIVO' },
+    { key: 'EP',  label: 'EF. PLUS' },
+    { key: 'Fx',  label: 'FLEX' },
+    { key: 'Id',  label: 'IDEAL' },
+    { key: 'N',   label: 'NACIONAL' },
+    { key: 'NP',  label: 'NAC. PLUS' },
+  ];
+  const PLAN_IDX = { 'Ef': 0, 'EP': 1, 'Fx': 2, 'Id': 3, 'N': 4, 'NP': 5 };
+
+  // Mapeamento: nome do plano → chave de tier na rede
+  const PLAN_TO_TIER = {
+    'Efetivo':      'Ef',
+    'Efetivo Plus': 'EP',
+    'Flex':         'Fx',
+    'Ideal':        'Id',
+    'Nacional':     'N',
+    'Nacional Plus':'NP',
+  };
+
+  // Tiers selecionados a partir dos planos escolhidos (bradPlans)
+  const selectedTiers = new Set();
+  console.log('[REDE] bradPlans recebidos:', JSON.stringify((d.bradPlans || []).map(p => p.plano)));
+  (d.bradPlans || []).forEach(p => {
+    const tier = PLAN_TO_TIER[p.plano];
+    if (tier) selectedTiers.add(tier);
+  });
+  console.log('[REDE] tiers selecionados:', [...selectedTiers]);
+  const filterActive = selectedTiers.size > 0;
+
+  // Colunas visíveis: apenas os tiers selecionados (ou todos se não houver mapeamento)
+  const visibleCols = filterActive
+    ? PLAN_COLS.filter(c => selectedTiers.has(c.key))
+    : PLAN_COLS;
+
+  // Índice máximo entre os tiers selecionados (hospitais com min <= esse índice são acessíveis)
+  const maxTierIdx = filterActive
+    ? Math.max(...[...selectedTiers].map(t => PLAN_IDX[t]))
+    : 5;
+
+  const RED = '#CC0000';
+  const thBase = `padding:7px 4px;font-size:8px;font-weight:800;color:#fff;text-align:center;letter-spacing:.5px;border-left:1px solid rgba(255,255,255,.2);line-height:1.2`;
+  const tdCid  = `font-size:9.5px;font-weight:800;color:${RED};background:#FFF5F5;text-align:center;padding:6px 5px;border:1px solid #F0E0E0;vertical-align:middle;line-height:1.35;white-space:pre-line`;
+  const tdNome = `font-size:10px;color:#1A1A3E;padding:5px 8px;border:1px solid #F0F0F5;vertical-align:middle;line-height:1.3`;
+  const tdPlan = `font-size:8.5px;font-weight:700;color:${RED};text-align:center;padding:5px 3px;border:1px solid #F0F0F5;vertical-align:middle;letter-spacing:.2px`;
+  const tdVoid = `font-size:8px;color:#E0E0E8;text-align:center;padding:5px 3px;border:1px solid #F0F0F5;vertical-align:middle`;
+
+  let rows = '';
+  regiao.cidades.forEach(cidade => {
+    // Filtra hospitais acessíveis por pelo menos um plano selecionado
+    const hospFiltrados = cidade.hospitais.filter(h =>
+      !filterActive || (PLAN_IDX[h.min] ?? 0) <= maxTierIdx
+    );
+    if (hospFiltrados.length === 0) return;
+
+    hospFiltrados.forEach((h, hi) => {
+      const minIdx = PLAN_IDX[h.min] ?? 0;
+      const planCells = visibleCols.map(col =>
+        PLAN_IDX[col.key] >= minIdx
+          ? `<td style="${tdPlan}">${h.tipo || 'H/P.S'}</td>`
+          : `<td style="${tdVoid}">—</td>`
+      ).join('');
+      const cidCell = hi === 0
+        ? `<td rowspan="${hospFiltrados.length}" style="${tdCid}">${esc(cidade.nome)}</td>`
+        : '';
+      const bg = hi % 2 === 0 ? '#fff' : '#FAFAFA';
+      rows += `<tr style="background:${bg}">${cidCell}<td style="${tdNome}">${esc(h.nome)}</td>${planCells}</tr>`;
+    });
+  });
+
+  const planHeaders = visibleCols.map(c => `<th style="${thBase}">${c.label}</th>`).join('');
+  const legend = `
+    <div style="margin-top:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <span style="font-size:9px;font-weight:800;color:#1A1A3E">LEGENDA:</span>
+      ${['H = Hospital','P.S = Pronto Socorro','M = Maternidade','A = Ambulatório','HDIA = Hospital Dia'].map(l =>
+        `<span style="font-size:9px;color:#6B6B8A;font-weight:600">${l}</span>`
+      ).join('<span style="color:#DDD;margin:0 2px">·</span>')}
+      <span style="margin-left:auto;font-size:9px;color:#AAAABC">Verifique disponibilidade em bradescosaude.com.br</span>
+    </div>`;
+
+  const regiaoId = regiaoKey.replace(/\s+/g, '-').toLowerCase();
+  return `
+  <div class="slide-box" id="sl-rede-${regiaoId}">
+    <div class="s-rede">
+      ${logoWm}
+      <div class="slide-sec-head" style="margin-bottom:14px">
+        <div class="slide-sec-bar" style="background:${RED};height:44px"></div>
+        <div>
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:${RED}">Bradesco Saúde · Rede Credenciada</div>
+          <div class="slide-sec-title">Lista de Hospitais por Linha de Planos — ${esc(regiao.label)}</div>
+          <div class="slide-sec-sub">${esc(regiao.subtitulo)}</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-family:'Open Sans',sans-serif">
+        <thead>
+          <tr style="background:${RED}">
+            <th style="padding:8px 6px;font-size:8px;font-weight:800;color:#fff;text-align:center;letter-spacing:.5px;width:82px">CIDADE</th>
+            <th style="padding:8px 8px;font-size:8px;font-weight:800;color:#fff;text-align:left;letter-spacing:.5px;border-left:1px solid rgba(255,255,255,.2)">NOME DO REFERENCIADO</th>
+            ${planHeaders}
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      ${legend}
+    </div>
+  </div>`;
+}
+
 /* ═══════════ SLIDE: CONTRACAPA ═══════════ */
 function buildBackCover(d) {
   const logoHtml = d.logoUrl
-    ? `<div style="background:#fff;border-radius:10px;padding:10px 20px;display:inline-flex;align-items:center;justify-content:center"><img src="${d.logoUrl}" style="max-height:48px;max-width:180px;object-fit:contain"></div>`
+    ? `<img src="${d.logoUrl}" style="max-height:56px;max-width:200px;object-fit:contain">`
     : `<div style="background:rgba(255,255,255,.15);border-radius:10px;padding:12px 24px;font-size:15px;font-weight:800;color:rgba(255,255,255,.85);letter-spacing:1.5px">${esc(d.nomeCorretora || 'CORRETORA')}</div>`;
   return `
   <div class="slide-box" id="sl-back">
@@ -1076,10 +1553,6 @@ function buildBackCover(d) {
 /* ═══════════ CHARTS ═══════════ */
 function drawCharts(d) {
   const atualColor = (INS[d.atual.seg] || INS.outro).color;
-  const allVals = [d.atual.valor, ...d.bradPlans.map(p => p.valor)].filter(v => v > 0);
-  if (!allVals.length) return;
-  const maxV = Math.max(...allVals);
-  const yMax = Math.ceil(maxV * 1.35 / 500) * 500;
 
   const labelPlugin = {
     id: 'lbl',
@@ -1093,7 +1566,6 @@ function drawCharts(d) {
           ctx.fillStyle = '#fff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          // Quebra valor em 2 linhas se barra for estreita
           const txt = fmt(v);
           const parts = txt.split(' ');
           if (bar.width < 70 && parts.length === 2) {
@@ -1108,52 +1580,72 @@ function drawCharts(d) {
     },
   };
 
-  const scaleOpts = {
-    min: 0, max: yMax, border: { display: false },
-    grid: { color: '#F0F0F5' },
-    ticks: {
-      callback: v => 'R$' + (v >= 1000 ? (v/1000).toLocaleString('pt-BR', {maximumFractionDigits:0}) + 'k' : v),
-      font: { size: 9 }, color: '#9999AA', maxTicksLimit: 6,
-    },
-  };
+  // Desenha charts para cada sufixo de slide de comparação
+  const slideGroups = [
+    { suffix: 'main',  plans: d.bradPlans },
+    { suffix: 'cop',   plans: d.bradPlans.filter(p => p.cop)  },
+    { suffix: 'nocop', plans: d.bradPlans.filter(p => !p.cop) },
+  ];
 
-  // Canvas do plano atual (simples, 1 barra)
-  const ca = document.getElementById('ch-atual');
-  if (ca && d.atual.valor > 0) charts.push(new Chart(ca, {
-    type: 'bar',
-    data: { labels: [''], datasets: [{ data: [d.atual.valor], backgroundColor: atualColor + 'DD', borderRadius: 8, borderSkipped: false }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      animation: { duration: 250 },
-      layout: { padding: { top: 28 } },
-      scales: { x: { grid: { display: false }, border: { display: false }, ticks: { display: false } }, y: scaleOpts },
-    },
-    plugins: [labelPlugin],
-  }));
+  slideGroups.forEach(({ suffix, plans }) => {
+    if (!plans.length) return;
+    if (!document.getElementById(`sl-comp-${suffix}`)) return;
 
-  // Canvas do Bradesco — múltiplas barras (uma por plano selecionado)
-  const cb = document.getElementById('ch-brad');
-  if (cb && d.bradPlans.length) {
-    const labels = d.bradPlans.map(p => p.label || p.plano);
-    const data   = d.bradPlans.map(p => p.valor);
-    const bgColors = d.bradPlans.map((_, i) => (BRAD_COLORS[i] || BRAD_COLORS[0]) + 'DD');
-    charts.push(new Chart(cb, {
+    const allVals = [
+      ...(d.showAtual ? [d.atual.valor] : []),
+      ...plans.map(p => p.valor)
+    ].filter(v => v > 0);
+    if (!allVals.length) return;
+    const maxV = Math.max(...allVals);
+    const yMax = Math.ceil(maxV * 1.35 / 500) * 500;
+
+    const scaleOpts = {
+      min: 0, max: yMax, border: { display: false },
+      grid: { color: '#F0F0F5' },
+      ticks: {
+        callback: v => 'R$' + (v >= 1000 ? (v/1000).toLocaleString('pt-BR', {maximumFractionDigits:0}) + 'k' : v),
+        font: { size: 9 }, color: '#9999AA', maxTicksLimit: 6,
+      },
+    };
+
+    // Plano atual
+    const ca = document.getElementById(`ch-atual-${suffix}`);
+    if (ca && d.showAtual && d.atual.valor > 0) charts.push(new Chart(ca, {
       type: 'bar',
-      data: { labels, datasets: [{ data, backgroundColor: bgColors, borderRadius: 8, borderSkipped: false }] },
+      data: { labels: [''], datasets: [{ data: [d.atual.valor], backgroundColor: atualColor + 'DD', borderRadius: 8, borderSkipped: false }] },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
         animation: { duration: 250 },
         layout: { padding: { top: 28 } },
-        scales: {
-          x: { grid: { display: false }, border: { display: false }, ticks: { display: false } },
-          y: scaleOpts,
-        },
+        scales: { x: { grid: { display: false }, border: { display: false }, ticks: { display: false } }, y: scaleOpts },
       },
       plugins: [labelPlugin],
     }));
-  }
+
+    // Bradesco — barras por plano
+    const cb = document.getElementById(`ch-brad-${suffix}`);
+    if (cb && plans.length) {
+      const labels   = plans.map(p => p.label || p.plano);
+      const data     = plans.map(p => p.valor);
+      const bgColors = plans.map((_, i) => (BRAD_COLORS[i] || BRAD_COLORS[0]) + 'DD');
+      charts.push(new Chart(cb, {
+        type: 'bar',
+        data: { labels, datasets: [{ data, backgroundColor: bgColors, borderRadius: 8, borderSkipped: false }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          animation: { duration: 250 },
+          layout: { padding: { top: 28 } },
+          scales: {
+            x: { grid: { display: false }, border: { display: false }, ticks: { display: false } },
+            y: scaleOpts,
+          },
+        },
+        plugins: [labelPlugin],
+      }));
+    }
+  }); // fim slideGroups.forEach
 }
 
 /* ═══════════ PDF EXPORT ═══════════ */
@@ -1164,10 +1656,17 @@ async function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [297, 167] });
     const d = getData();
-    const ids = ['sl-cover','sl-comp'];
+    // Slides de comparação: detecta quais existem no DOM
+    const compIds = ['sl-comp-main','sl-comp-cop','sl-comp-nocop'].filter(id => document.getElementById(id));
+    const ids = ['sl-cover', ...compIds];
     if (d.showCop && d.bradPlans.some(p => p.cop)) ids.push('sl-cop');
     if (d.showWait) ids.push('sl-wait');
     if (d.showDiff) ids.push('sl-diff');
+    if (d.showRede) {
+      ['ABCDM', 'SP Capital', 'Interior'].forEach(r => {
+        if (d.redeRegioes[r]) ids.push(`sl-rede-${r.replace(/\s+/g,'-').toLowerCase()}`);
+      });
+    }
     ids.push('sl-back');
 
     for (const [idx, sid] of ids.entries()) {
@@ -1194,35 +1693,50 @@ async function gerarPDF() {
 }
 
 /* ═══════════ PDF PARSER (SPG Bradesco) ═══════════ */
-async function handleBradescoFile(file) {
-  if (!file) return;
-  const status = document.getElementById('brad-pdf-status');
-  status.textContent = '⏳ Lendo PDF...';
-  try {
-    const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-    const pages = [];
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      const items = content.items.slice().sort((a, b) => {
-        const dy = b.transform[5] - a.transform[5];
-        return Math.abs(dy) > 3 ? dy : a.transform[4] - b.transform[4];
-      });
-      const lines = []; let cur = []; let lastY = null;
-      for (const it of items) {
-        const y = it.transform[5];
-        if (lastY === null || Math.abs(y - lastY) > 3) {
-          if (cur.length) lines.push(cur.map(x => x.str).join(' ').trim());
-          cur = [it]; lastY = y;
-        } else { cur.push(it); }
-      }
-      if (cur.length) lines.push(cur.map(x => x.str).join(' ').trim());
-      pages.push(lines.filter(Boolean));
+
+/* Store global das páginas de cada PDF */
+let _pdfPagesStore = { cop: null, nocop: null };
+
+/* Parseia um arquivo PDF e retorna array de páginas */
+async function parsePdfFile(file) {
+  const ab = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+  const pages = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const items = content.items.slice().sort((a, b) => {
+      const dy = b.transform[5] - a.transform[5];
+      return Math.abs(dy) > 3 ? dy : a.transform[4] - b.transform[4];
+    });
+    const lines = []; let cur = []; let lastY = null;
+    for (const it of items) {
+      const y = it.transform[5];
+      if (lastY === null || Math.abs(y - lastY) > 3) {
+        if (cur.length) lines.push(cur.map(x => x.str).join(' ').trim());
+        cur = [it]; lastY = y;
+      } else { cur.push(it); }
     }
-    autofillFromPDF(pages);
-    status.textContent = '✅ PDF importado com sucesso!';
-    setTimeout(() => { status.textContent = ''; }, 4000);
+    if (cur.length) lines.push(cur.map(x => x.str).join(' ').trim());
+    pages.push(lines.filter(Boolean));
+  }
+  return pages;
+}
+
+let _parsedPdfsBatch = [];
+
+/* Handler único — aceita 1 ou 2 arquivos (juntos ou em chamadas separadas) */
+async function handleBradescoPdfs(files) {
+  if (!files || !files.length) return;
+  const status = document.getElementById('brad-pdf-status');
+  status.textContent = '⏳ Lendo PDF(s)...';
+  _parsedPdfsBatch = [];
+  try {
+    for (const file of Array.from(files)) {
+      const pages = await parsePdfFile(file);
+      _parsedPdfsBatch.push({ name: file.name, pages });
+    }
+    showPdfAssignmentUI();
   } catch(e) {
     status.textContent = '❌ Erro ao ler PDF. Verifique se é uma cotação SPG.';
     console.error(e);
@@ -1230,15 +1744,52 @@ async function handleBradescoFile(file) {
   document.getElementById('brad-pdf').value = '';
 }
 
-/* ═══════════ PDF — DADOS GLOBAIS DO PARSING ═══════════ */
-let _pdfPages = null; // armazena pages para uso no modal
+function showPdfAssignmentUI() {
+  const status = document.getElementById('brad-pdf-status');
+  const n = _parsedPdfsBatch.length;
+  let html = `<div style="margin-top:4px;font-size:12px;font-weight:600;color:#555">Identifique ${n === 1 ? 'o PDF' : 'os PDFs'}:</div>`;
+  _parsedPdfsBatch.forEach((pdf, i) => {
+    const guessedCop = /cop/i.test(pdf.name);
+    html += `
+      <div style="margin:5px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:11px;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#333" title="${pdf.name}">📄 ${pdf.name}</span>
+        <label style="font-size:12px;cursor:pointer;display:flex;align-items:center;gap:3px"><input type="radio" name="pdftype${i}" value="cop" ${guessedCop ? 'checked' : ''}> ✔ Com COP</label>
+        <label style="font-size:12px;cursor:pointer;display:flex;align-items:center;gap:3px"><input type="radio" name="pdftype${i}" value="nocop" ${!guessedCop ? 'checked' : ''}> ✕ Sem COP</label>
+      </div>`;
+  });
+  html += `<button onclick="confirmPdfAssignment()" style="margin-top:6px;background:#b50000;color:#fff;border:none;border-radius:4px;padding:4px 14px;cursor:pointer;font-size:12px;font-weight:600">✓ Confirmar</button>`;
+  status.innerHTML = html;
+}
 
-function autofillFromPDF(pages) {
-  _pdfPages = pages;
+function confirmPdfAssignment() {
+  _parsedPdfsBatch.forEach((pdf, i) => {
+    let isCop = true;
+    document.querySelectorAll(`input[name="pdftype${i}"]`).forEach(r => { if (r.checked) isCop = r.value === 'cop'; });
+    _pdfPagesStore[isCop ? 'cop' : 'nocop'] = pdf.pages;
+  });
+  const copOk   = _pdfPagesStore.cop   ? '✔ Com COP' : '';
+  const nocopOk = _pdfPagesStore.nocop ? '✕ Sem COP' : '';
+  const loaded  = [copOk, nocopOk].filter(Boolean);
+  const status = document.getElementById('brad-pdf-status');
+  status.textContent = loaded.join('  |  ') + ' importado(s)';
+  if (loaded.length < 2) status.textContent += ' — clique novamente para adicionar o outro';
+  document.getElementById('brad-pdf-clear-btn').style.display = '';
+  mergeAndShowPlans();
+}
+
+/* Limpa os PDFs importados e volta ao modo manual */
+function clearBradPdfs() {
+  _pdfPagesStore = { cop: null, nocop: null };
+  _parsedPdfsBatch = [];
+  document.getElementById('brad-pdf-status').textContent = '';
+  document.getElementById('brad-pdf-clear-btn').style.display = 'none';
+  clearBradPlans();
+}
+
+/* Preenche empresa/vidas a partir das páginas de um PDF */
+function fillCompanyFromPages(pages) {
   const all = pages.flat();
   const fullText = all.join('\n');
-
-  // Company name
   const cnpjM = fullText.match(/(\d{2}[\.\d]+\/\d{4}-\d{2})/);
   if (cnpjM) {
     const idx = all.findIndex(l => l.includes(cnpjM[1]));
@@ -1251,35 +1802,79 @@ function autofillFromPDF(pages) {
       }
     }
   }
-
-  // Vidas
   const vidasM = fullText.match(/(\d+)\s*pessoas/i);
   if (vidasM) {
     document.getElementById('brad-vidas').value = vidasM[1];
     document.getElementById('a-vidas').value = vidasM[1];
   }
+}
 
-  // Extrai todos os planos disponíveis (página 3, índice 2)
-  const planos = extractPlansFromPDF(pages);
+/* Mescla planos dos dois PDFs e abre modal */
+function mergeAndShowPlans() {
+  const refPages = _pdfPagesStore.cop || _pdfPagesStore.nocop;
+  if (!refPages) return;
 
-  if (planos.length > 1) {
-    // Mostra modal para o usuário escolher
-    openPlanModal(planos);
-  } else if (planos.length === 1) {
-    // Apenas um plano: preenche direto
-    applyPlanData(planos[0], pages);
-  } else {
-    // Fallback: comportamento antigo
-    autofillFallback(pages);
+  fillCompanyFromPages(refPages);
+
+  let allPlanos = [];
+  if (_pdfPagesStore.cop)
+    extractPlansFromPDF(_pdfPagesStore.cop).forEach(p => allPlanos.push({ ...p, cop: true }));
+  if (_pdfPagesStore.nocop)
+    extractPlansFromPDF(_pdfPagesStore.nocop).forEach(p => allPlanos.push({ ...p, cop: false }));
+
+  // Preserva ordem original dos grupos, mas ordena cada grupo barato→caro
+  const groupOrder = [];
+  const seenGroups = new Set();
+  allPlanos.forEach(p => {
+    const k = `${p.cop}|${p.plano}`;
+    if (!seenGroups.has(k)) { seenGroups.add(k); groupOrder.push(k); }
+  });
+  allPlanos.sort((a, b) => {
+    const oa = groupOrder.indexOf(`${a.cop}|${a.plano}`);
+    const ob = groupOrder.indexOf(`${b.cop}|${b.plano}`);
+    if (oa !== ob) return oa - ob;
+    return a.valor - b.valor;
+  });
+
+  // Atribui label e reembolso para planos com variação de cobertura
+  const varSeen = {};
+  allPlanos.forEach(p => {
+    const suffixes = BRAD_REEMBOLSO_SUFFIX[p.plano];
+    if (!suffixes) return;
+    const k = `${p.cop}|${p.plano}`;
+    if (varSeen[k] === undefined) varSeen[k] = 0;
+    const i = varSeen[k];
+    p.label = `${p.plano} ${suffixes[Math.min(i, suffixes.length - 1)]}`;
+    p.reembolso = BRAD_REEMBOLSO[p.plano][Math.min(i, suffixes.length - 1)];
+    varSeen[k]++;
+  });
+
+  if (allPlanos.length > 1) {
+    openPlanModal(allPlanos);
+  } else if (allPlanos.length === 1) {
+    const p = { ...allPlanos[0] };
+    const rd = BRAD_REEMBOLSO[p.plano];
+    p.reembolso = Array.isArray(rd) ? rd[0] : (rd || 0);
+    state.bradPlans = [p];
+    applyFormFields(p);
+    renderBradPlansReembSection();
     render();
   }
+}
+
+/* Aplica os campos do formulário com base no plano escolhido */
+function applyFormFields(p) {
+  const sel = document.getElementById('brad-plano');
+  for (const opt of sel.options) { if (opt.value === p.plano) { sel.value = p.plano; break; } }
+  if (p.acom) document.getElementById('brad-acom').value = p.acom;
+  if (p.valor) document.getElementById('brad-valor').value = p.valor.toFixed(2);
 }
 
 /* Extrai planos da página 3 do PDF */
 function extractPlansFromPDF(pages) {
   const PLAN_MAP = {
     'EFETIVO PLUS': 'Efetivo Plus', 'EFETIVO': 'Efetivo',
-    'NACIONAL PLUS': 'Nacional Plus', 'NACIONAL': 'Nacional',
+    'NACIONAL PLUS': 'Nacional Plus', 'NACIONAL FLEX': 'Flex', 'NACIONAL III': 'Nacional', 'NACIONAL': 'Nacional',
     'FLEX': 'Flex', 'IDEAL': 'Ideal', 'REGIONAL': 'Regional', 'SAUDE+': 'Saúde +',
   };
   const planNames = Object.keys(PLAN_MAP).sort((a,b) => b.length - a.length);
@@ -1358,15 +1953,18 @@ function extractPlansFromPDF(pages) {
 function openPlanModal(planos) {
   const list = document.getElementById('modal-plans-list');
   list.innerHTML = '';
-  planos.forEach((p, i) => {
+
+  const addPlanItem = (p) => {
+    const gIdx = planos.indexOf(p);
     const div = document.createElement('div');
     div.className = 'plan-opt';
     div.innerHTML = `
-      <input type="checkbox" id="pr-${i}" value="${i}">
-      <label class="plan-opt-name" for="pr-${i}" onclick="event.stopPropagation();event.preventDefault();document.getElementById('pr-${i}').click();updateModalConfirm()">${p.label}</label>
-      <span class="plan-opt-val">R$ ${p.valor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>
+      <input type="checkbox" id="pr-${gIdx}" value="${gIdx}">
+      <label class="plan-opt-name" for="pr-${gIdx}"
+        onclick="event.stopPropagation();event.preventDefault();document.getElementById('pr-${gIdx}').click();updateModalConfirm()">${esc(p.label||p.plano)}</label>
+      <span class="plan-opt-val">R$ ${(+p.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
     `;
-    div.addEventListener('click', (e) => {
+    div.addEventListener('click', e => {
       if (e.target.tagName === 'INPUT') { updateModalConfirm(); return; }
       const cb = div.querySelector('input');
       cb.checked = !cb.checked;
@@ -1377,7 +1975,28 @@ function openPlanModal(planos) {
       div.classList.toggle('sel', div.querySelector('input').checked);
     });
     list.appendChild(div);
-  });
+  };
+
+  const addSection = (plans, isCop) => {
+    if (!plans.length) return;
+    const hdr = document.createElement('div');
+    hdr.className = 'modal-section-hdr';
+    hdr.innerHTML = isCop
+      ? `<span class="cop-chip sim" style="font-size:11px;padding:3px 10px">✔ Com Coparticipação</span>`
+      : `<span class="cop-chip nao" style="font-size:11px;padding:3px 10px">✕ Sem Coparticipação</span>`;
+    list.appendChild(hdr);
+    plans.forEach(addPlanItem);
+  };
+
+  // 2 tipos → duas seções; 1 tipo → seção única com cabeçalho correspondente
+  const hasBoth = planos.some(p => p.cop) && planos.some(p => !p.cop);
+  if (hasBoth) {
+    addSection(planos.filter(p => p.cop),  true);
+    addSection(planos.filter(p => !p.cop), false);
+  } else {
+    addSection(planos, planos.some(p => p.cop));
+  }
+
   document.getElementById('plan-modal')._planos = planos;
   document.getElementById('modal-confirm-btn').disabled = true;
   document.getElementById('plan-modal').classList.add('open');
@@ -1395,21 +2014,22 @@ function closePlanModal() {
 function confirmPlanSelection() {
   const planos = document.getElementById('plan-modal')._planos;
   const chosen = [];
-  document.querySelectorAll('#modal-plans-list input[type=checkbox]').forEach((cb, i) => {
-    if (cb.checked) {
-      const p = { ...planos[i] };
-      // Prioridade: reembolso extraído do PDF → tabela BRAD_REEMBOLSO → 0
-      if (!p.reembolso || p.reembolso === 0) {
-        const reembData = BRAD_REEMBOLSO[p.plano];
-        p.reembolso = Array.isArray(reembData) ? reembData[0] : (reembData || 0);
-      }
-      chosen.push(p);
-    }
+  // Usa cb.value (índice global) para suportar agrupamento no modal
+  document.querySelectorAll('#modal-plans-list input[type=checkbox]').forEach(cb => {
+    if (cb.checked) chosen.push({ ...planos[parseInt(cb.value)] });
   });
   if (!chosen.length) return;
+
+  chosen.forEach(p => {
+    if (p.reembolso) return; // já atribuído via label (planos com variação)
+    const reembData = BRAD_REEMBOLSO[p.plano];
+    p.reembolso = Array.isArray(reembData) ? reembData[0] : (reembData || 0);
+  });
+
   closePlanModal();
   state.bradPlans = chosen;
-  applyPlanData(chosen[0], _pdfPages);
+  // cop já vem de qual PDF foi usado — não sobrescreve
+  applyFormFields(chosen[0]);
   renderBradPlansReembSection();
   render();
 }
