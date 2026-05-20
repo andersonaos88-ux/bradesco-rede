@@ -500,6 +500,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
           <label for="opt-rede">Resumo de Rede Credenciada</label>
         </div>
         <div id="rede-regioes-wrap" style="display:none;padding:4px 0 0 10px">
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:2px 4px 4px">São Paulo</div>
           <div class="check-opt" style="margin-bottom:5px;border-color:rgba(204,0,0,.2)" onclick="toggleRede('ABCDM')">
             <input type="checkbox" id="opt-rede-abcdm" checked onclick="event.stopPropagation();toggleRede('ABCDM')">
             <label for="opt-rede-abcdm" style="font-size:11px">📍 Região ABCDM</label>
@@ -508,9 +509,31 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
             <input type="checkbox" id="opt-rede-spcap" checked onclick="event.stopPropagation();toggleRede('SP Capital')">
             <label for="opt-rede-spcap" style="font-size:11px">📍 São Paulo Capital</label>
           </div>
-          <div class="check-opt" style="border-color:rgba(204,0,0,.2)" onclick="toggleRede('Interior')">
+          <div class="check-opt" style="margin-bottom:5px;border-color:rgba(204,0,0,.2)" onclick="toggleRede('Interior')">
             <input type="checkbox" id="opt-rede-int" checked onclick="event.stopPropagation();toggleRede('Interior')">
             <label for="opt-rede-int" style="font-size:11px">📍 Interior de SP</label>
+          </div>
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:6px 4px 4px;margin-top:2px">Centro-Oeste</div>
+          <div class="check-opt" style="margin-bottom:5px;border-color:rgba(204,0,0,.2)" onclick="toggleRede('GO')">
+            <input type="checkbox" id="opt-rede-go" onclick="event.stopPropagation();toggleRede('GO')">
+            <label for="opt-rede-go" style="font-size:11px">📍 Goiás (GO)</label>
+          </div>
+          <div class="check-opt" style="margin-bottom:5px;border-color:rgba(204,0,0,.2)" onclick="toggleRede('MT')">
+            <input type="checkbox" id="opt-rede-mt" onclick="event.stopPropagation();toggleRede('MT')">
+            <label for="opt-rede-mt" style="font-size:11px">📍 Mato Grosso (MT)</label>
+          </div>
+          <div class="check-opt" style="margin-bottom:5px;border-color:rgba(204,0,0,.2)" onclick="toggleRede('DF')">
+            <input type="checkbox" id="opt-rede-df" onclick="event.stopPropagation();toggleRede('DF')">
+            <label for="opt-rede-df" style="font-size:11px">📍 Distrito Federal (DF)</label>
+          </div>
+          <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:6px 4px 4px;margin-top:2px">Norte / Nordeste</div>
+          <div class="check-opt" style="margin-bottom:5px;border-color:rgba(204,0,0,.2)" onclick="toggleRede('TO')">
+            <input type="checkbox" id="opt-rede-to" onclick="event.stopPropagation();toggleRede('TO')">
+            <label for="opt-rede-to" style="font-size:11px">📍 Tocantins (TO)</label>
+          </div>
+          <div class="check-opt" style="border-color:rgba(204,0,0,.2)" onclick="toggleRede('RN')">
+            <input type="checkbox" id="opt-rede-rn" onclick="event.stopPropagation();toggleRede('RN')">
+            <label for="opt-rede-rn" style="font-size:11px">📍 Rio Grande do Norte (RN)</label>
           </div>
         </div>
       </div>
@@ -774,6 +797,150 @@ const REDE_DATA = {
       ]},
     ],
   },
+
+  // ── CENTRO-OESTE ──────────────────────────────────────────────────────────
+  'GO': {
+    label: 'Goiás — Centro-Oeste',
+    subtitulo: 'Goiânia · Anápolis · Aparecida de Goiânia · Rio Verde · Caldas Novas',
+    cidades: [
+      { nome: 'Goiânia', hospitais: [
+        { nome: 'Hospital Samaritano',              plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hosp. do Coração de Goiás',        plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S/A' },
+        { nome: 'Hospital da Criança',              plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hospital Santa Helena',            plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hospital Maya',                    plans: ['Ef','EP','Fx','N','NP'],       tipo: 'H/P.S' },
+        { nome: 'Hospital Unique',                  plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hospital da Mulher',               plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S/M' },
+        { nome: 'Maternidade Modelo',               plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/M' },
+        { nome: 'Hospital Asmigo',                  plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hosp. Israelita Albert Einstein',  plans: ['NP'],                          tipo: 'H/P.S' },
+        { nome: 'Oftalmo Center',                   plans: ['Fx','Id','N','NP'],            tipo: 'H DIA' },
+        { nome: 'Pronto Socorro Infantil',          plans: ['N','NP'],                      tipo: 'P.S' },
+        { nome: 'Clínica do Esporte',               plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H DIA' },
+        { nome: 'Clínica Ela Maternidade',          plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/M' },
+        { nome: 'Hosp. Ortopédico de Goiânia',      plans: ['Ef','Fx','Id','N','NP'],      tipo: 'H/P.S/A' },
+        { nome: 'Inst. Mastologia e Oncologia',     plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H DIA' },
+        { nome: 'Inst. do Rim de Goiânia',          plans: ['N','NP'],                      tipo: 'H DIA' },
+        { nome: 'Anis Rassi Hospital',              plans: ['N','NP'],                      tipo: 'H/P.S' },
+        { nome: 'Hospital de Acidentados',          plans: ['N','NP'],                      tipo: 'H/P.S' },
+      ]},
+      { nome: 'Anápolis', hospitais: [
+        { nome: 'Hosp. de Olhos Camargo Zambrin',   plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H DIA' },
+        { nome: 'Hospital Evangélico Goiano',       plans: ['N','NP'],                      tipo: 'H/P.S' },
+        { nome: 'Hospital Santa Mônica',            plans: ['N','NP'],                      tipo: 'H/P.S' },
+      ]},
+      { nome: 'Aparecida\nde Goiânia', hospitais: [
+        { nome: 'Hospital São Bernardo',            plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+      ]},
+      { nome: 'Rio Verde', hospitais: [
+        { nome: 'Hospital São Cottolengo',          plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Clínica e Mat. Modelo',            plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/M' },
+      ]},
+      { nome: 'Caldas\nNovas', hospitais: [
+        { nome: 'Hosp. Mat. Nsa. Sra. Aparecida',  plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S/M' },
+      ]},
+    ],
+  },
+  'MT': {
+    label: 'Mato Grosso — Centro-Oeste',
+    subtitulo: 'Cuiabá · Várzea Grande · Rondonópolis · Sinop · Sorriso',
+    cidades: [
+      { nome: 'Cuiabá', hospitais: [
+        { nome: 'Hospital Santa Rosa',              plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S/M' },
+        { nome: 'Hosp. Geral e Mat. de Cuiabá',    plans: ['EP','Fx','N','NP'],            tipo: 'H/P.S/M' },
+        { nome: 'Hospital de Olhos',                plans: ['EP','Fx','Id','N','NP'],       tipo: 'H DIA' },
+        { nome: 'Cx. Hosp. Jardim Cuiabá',         plans: ['Fx','Id','N','NP'],            tipo: 'H/P.S' },
+        { nome: 'Hospital São Judas Tadeu',         plans: ['N','NP'],                      tipo: 'H/P.S' },
+        { nome: 'Valore Day Hospital',              plans: ['N','NP'],                      tipo: 'H DIA' },
+      ]},
+      { nome: 'Várzea Grande', hospitais: [
+        { nome: 'Hospital Santa Rita',              plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S/M' },
+      ]},
+      { nome: 'Rondonópolis', hospitais: [
+        { nome: 'Santa Casa de Rondonópolis',       plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hosp. e Mat. Dois Pinheiros',      plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S/M' },
+      ]},
+      { nome: 'Sinop', hospitais: [
+        { nome: 'Hospital Santo Antonio',           plans: ['Ef','EP','N','NP'],            tipo: 'H/P.S' },
+      ]},
+      { nome: 'Sorriso', hospitais: [
+        { nome: 'Hospital 13 de Maio',              plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+      ]},
+    ],
+  },
+  'DF': {
+    label: 'Distrito Federal — Centro-Oeste',
+    subtitulo: 'Brasília e região',
+    cidades: [
+      { nome: 'Brasília', hospitais: [
+        { nome: 'Hospital Santa Helena',            plans: ['Fx','N','NP'],                 tipo: 'H/P.S' },
+        { nome: 'DF Star Hospital',                 plans: ['NP'],                          tipo: 'H/P.S' },
+        { nome: 'H. Sta. Lucia Taguatinga',         plans: ['Ef','EP','N','NP'],            tipo: 'H/P.S' },
+        { nome: 'Prontonorte',                      plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hospital Alvorada Brasília',       plans: ['Fx','N','NP'],                 tipo: 'H/P.S' },
+        { nome: 'Home Hospital',                    plans: ['EP','Fx','Id','N','NP'],       tipo: 'H/P.S' },
+        { nome: 'Hosp. do Coração do Brasil',       plans: ['N','NP'],                      tipo: 'H/P.S' },
+        { nome: 'Hospital Santa Luzia',             plans: ['N','NP'],                      tipo: 'H/P.S' },
+        { nome: 'Hosp. Sírio Libanês Brasília',     plans: ['NP'],                          tipo: 'H/P.S' },
+        { nome: 'Hospital Santa Lúcia',             plans: ['Ef','EP','Id','N','NP'],       tipo: 'H/P.S' },
+        { nome: 'Hospital São Francisco',           plans: ['EP','Fx','Id','N','NP'],       tipo: 'H/P.S' },
+        { nome: 'Maternidade Brasília',             plans: ['EP','Fx','Id','N','NP'],       tipo: 'H/P.S/M' },
+        { nome: 'Hospital Águas Claras',            plans: ['EP','Id','N','NP'],            tipo: 'H/P.S' },
+        { nome: 'Hospital Santa Marta',             plans: ['EP','Fx','Id','N','NP'],       tipo: 'H/P.S' },
+        { nome: 'Hospital Anchieta',                plans: ['EP','N','NP'],                 tipo: 'H/P.S' },
+        { nome: 'Hosp. Maria Auxiliadora (Gama)',   plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hospital Daher Lago Sul',          plans: ['Fx','Id','N','NP'],            tipo: 'H/P.S' },
+      ]},
+    ],
+  },
+
+  // ── NORTE / NORDESTE ──────────────────────────────────────────────────────
+  'TO': {
+    label: 'Tocantins — Norte',
+    subtitulo: 'Araguaína · Gurupi · Palmas · Paraíso do Tocantins',
+    cidades: [
+      { nome: 'Araguaína', hospitais: [
+        { nome: 'Hosp. São Lucas de Araguaína',     plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hospital Dom Orione',              plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Instituto Sinai',                  plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hosp. e Mat. Santa Catarina',      plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S/M' },
+      ]},
+      { nome: 'Gurupi', hospitais: [
+        { nome: 'Hospital São Francisco',           plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hosp. e Mat. Cristo Rei',          plans: ['Fx','Id','N','NP'],            tipo: 'H/P.S/M' },
+        { nome: 'Hospital Oswaldo Cruz',            plans: ['Fx','Id','N','NP'],            tipo: 'H/P.S' },
+        { nome: 'Hospital Palmas Medical HPM',      plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+      ]},
+      { nome: 'Palmas', hospitais: [
+        { nome: 'IOP',                              plans: ['EP','Fx','Id','N','NP'],       tipo: 'H DIA' },
+        { nome: 'Uni Ped Pronto Pediátrico',        plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'P.S' },
+      ]},
+      { nome: 'Paraíso do\nTocantins', hospitais: [
+        { nome: 'HCOR — Hosp. Coração Tocantins',  plans: ['N','NP'],                      tipo: 'H/P.S' },
+      ]},
+    ],
+  },
+  'RN': {
+    label: 'Rio Grande do Norte — Nordeste',
+    subtitulo: 'Natal · Mossoró',
+    cidades: [
+      { nome: 'Natal', hospitais: [
+        { nome: 'Hospital Unimed Natal',            plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Casa de Saúde São Lucas',          plans: ['Fx','Id','N','NP'],            tipo: 'H/P.S' },
+        { nome: 'Natal Hospital Center',            plans: ['Ef','EP','Fx','N','NP'],       tipo: 'H/P.S' },
+        { nome: 'Prontoclínica de Olhos',           plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H DIA' },
+        { nome: 'Hospital São Luiz',                plans: ['Fx','Id','N','NP'],            tipo: 'H/P.S' },
+        { nome: 'Hosp. do Coração de Natal',        plans: ['N','NP'],                      tipo: 'H/P.S' },
+      ]},
+      { nome: 'Mossoró', hospitais: [
+        { nome: 'Casa Saúde Dix Sept Rosado',       plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hospital Wilson Rosado',           plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Hospital Dr. Luiz Antonio',        plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S' },
+        { nome: 'Prontoclínica da Criança',         plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'P.S' },
+        { nome: 'Hospital Promater',                plans: ['Ef','EP','Fx','Id','N','NP'], tipo: 'H/P.S/M' },
+      ]},
+    ],
+  },
 };
 
 /* ═══════════ STATE ═══════════ */
@@ -790,7 +957,7 @@ let state = {
   showAtual: true,   // checkbox "incluir plano atual na apresentação"
   bradPlans: [], // planos selecionados no modal PDF (múltiplos)
   showRede: false,
-  redeRegioes: { 'ABCDM': true, 'SP Capital': true, 'Interior': true },
+  redeRegioes: { 'ABCDM': true, 'SP Capital': true, 'Interior': true, 'GO': false, 'MT': false, 'DF': false, 'TO': false, 'RN': false },
 };
 let charts = [];
 let renderGen = 0;
@@ -1071,7 +1238,7 @@ function toggleOpt(key) {
 
 function toggleRede(regiao) {
   state.redeRegioes[regiao] = !state.redeRegioes[regiao];
-  const keyMap = { 'ABCDM': 'abcdm', 'SP Capital': 'spcap', 'Interior': 'int' };
+  const keyMap = { 'ABCDM': 'abcdm', 'SP Capital': 'spcap', 'Interior': 'int', 'GO': 'go', 'MT': 'mt', 'DF': 'df', 'TO': 'to', 'RN': 'rn' };
   const el = document.getElementById(`opt-rede-${keyMap[regiao]}`);
   if (el) el.checked = state.redeRegioes[regiao];
   render();
@@ -1147,7 +1314,7 @@ function render() {
   if (d.showWait) html += buildCarenciaSlide(d);
   if (d.showDiff) html += buildDiffSlide(d);
   if (d.showRede) {
-    ['ABCDM', 'SP Capital', 'Interior'].forEach(r => {
+    ['ABCDM', 'SP Capital', 'Interior', 'GO', 'MT', 'DF', 'TO', 'RN'].forEach(r => {
       if (d.redeRegioes[r]) html += buildRedeSlide(d, r);
     });
   }
