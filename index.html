@@ -2416,8 +2416,8 @@ function applySnapshot(snap) {
   }
   if (s.bradPlans !== undefined) {
     state.bradPlans = s.bradPlans;
-    renderBradPlans && renderBradPlans();
   }
+  renderBradPlansReembSection();
   render();
 }
 
