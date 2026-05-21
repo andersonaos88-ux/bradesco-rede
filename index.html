@@ -95,6 +95,34 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
 .pdf-btn { padding: 8px 18px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s; font-family: inherit; }
 .pdf-btn:hover { background: var(--red2); }
 .pdf-btn:disabled { opacity: .6; cursor: not-allowed; }
+.hist-btn { padding: 8px 14px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .15s; font-family: inherit; }
+.hist-btn:hover { border-color: var(--red); color: var(--red); }
+.save-btn { padding: 8px 14px; background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .15s; font-family: inherit; }
+.save-btn:hover { background: #dcfce7; border-color: #86efac; }
+.save-btn:disabled { opacity: .5; cursor: not-allowed; }
+.preview-bar-btns { display: flex; gap: 8px; align-items: center; }
+
+/* ── HISTORY PANEL ── */
+.hist-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 200; }
+.hist-overlay.open { display: block; }
+.hist-panel { position: fixed; top: 0; right: -420px; width: 420px; height: 100vh; background: var(--white); box-shadow: -4px 0 32px rgba(0,0,0,.18); z-index: 201; display: flex; flex-direction: column; transition: right .25s cubic-bezier(.4,0,.2,1); }
+.hist-panel.open { right: 0; }
+.hist-panel-head { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.hist-panel-head h2 { font-size: 15px; font-weight: 800; color: var(--text); }
+.hist-panel-head p { font-size: 11px; color: var(--muted); }
+.hist-close { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--muted); line-height: 1; padding: 4px; }
+.hist-close:hover { color: var(--text); }
+.hist-list { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.hist-empty { text-align: center; color: var(--muted); font-size: 13px; padding: 40px 20px; }
+.hist-item { border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all .15s; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.hist-item:hover { border-color: var(--red); background: #fff5f5; }
+.hist-item-info { flex: 1; min-width: 0; }
+.hist-item-label { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-item-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.hist-item-del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 2px 4px; border-radius: 4px; flex-shrink: 0; transition: color .15s; }
+.hist-item-del:hover { color: #dc2626; background: #fef2f2; }
+.hist-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 300; transition: transform .25s; pointer-events: none; }
+.hist-toast.show { transform: translateX(-50%) translateY(0); }
 .slides-wrap { display: flex; flex-direction: column; gap: 20px; align-items: center; }
 .slide-box { box-shadow: 0 6px 28px rgba(0,0,0,.25); border-radius: 6px; overflow: hidden; }
 .empty { min-height: 360px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); gap: 10px; }
@@ -548,7 +576,11 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
   <main class="preview">
     <div class="preview-bar">
       <span>📄 Preview da apresentação</span>
-      <button class="pdf-btn" id="pdf-btn" onclick="gerarPDF()">⬇ Baixar PDF</button>
+      <div class="preview-bar-btns">
+        <button class="hist-btn" onclick="openHistPanel()">🕐 Histórico</button>
+        <button class="save-btn" id="save-snap-btn" onclick="saveSnapshot()">💾 Salvar</button>
+        <button class="pdf-btn" id="pdf-btn" onclick="gerarPDF()">⬇ Baixar PDF</button>
+      </div>
     </div>
     <div id="doc-wrap" class="slides-wrap">
       <div class="empty"><div class="icon">🏥</div><p>Preencha os dados e a apresentação aparece aqui</p></div>
@@ -556,6 +588,22 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
   </main>
 
 </div>
+
+<!-- ══ HISTORY PANEL ══ -->
+<div class="hist-overlay" id="hist-overlay" onclick="closeHistPanel()"></div>
+<aside class="hist-panel" id="hist-panel">
+  <div class="hist-panel-head">
+    <div>
+      <h2>📋 Propostas salvas</h2>
+      <p>Clique para carregar · máx. 15 registros</p>
+    </div>
+    <button class="hist-close" onclick="closeHistPanel()">✕</button>
+  </div>
+  <div class="hist-list" id="hist-list">
+    <div class="hist-empty">Carregando…</div>
+  </div>
+</aside>
+<div class="hist-toast" id="hist-toast"></div>
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -2285,6 +2333,185 @@ function fmt(v) {
 }
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════ HISTÓRICO / SNAPSHOT ═══════════ */
+const API = 'https://api.corretortech.com';
+
+function getSnapshot() {
+  return {
+    form: {
+      empresa:        document.getElementById('empresa')?.value.trim() || '',
+      mesano:         document.getElementById('mesano')?.value || '',
+      consultor:      document.getElementById('consultor')?.value.trim() || '',
+      nomeCorretora:  document.getElementById('nome-corretora')?.value.trim() || '',
+      aSeguradora:    document.getElementById('a-seg')?.value || 'sulamerica',
+      aPlano:         document.getElementById('a-plano')?.value || '',
+      aVidas:         parseInt(document.getElementById('a-vidas')?.value) || 1,
+      aValorRaw:      parseFloat(document.getElementById('a-valor')?.value) || 0,
+      aReembolsoVal:  parseFloat(document.getElementById('a-reembolso')?.value) || 0,
+      bradPlano:      document.getElementById('brad-plano')?.value || 'Efetivo',
+      bradAcom:       document.getElementById('brad-acom')?.value || 'Apartamento',
+      bradVidas:      parseInt(document.getElementById('brad-vidas')?.value) || 1,
+      bradValorRaw:   parseFloat(document.getElementById('brad-valor')?.value) || 0,
+      bradReembolsoVal: parseFloat(document.getElementById('brad-reembolso')?.value) || 0,
+    },
+    state: {
+      copAtual:      state.copAtual,
+      copBrad:       state.copBrad,
+      atualReembShow: state.atualReembShow,
+      bradReembShow: state.bradReembShow,
+      showCop:       state.showCop,
+      showWait:      state.showWait,
+      showDiff:      state.showDiff,
+      showAtual:     state.showAtual,
+      bradPlans:     state.bradPlans,
+      showRede:      state.showRede,
+      redeRegioes:   state.redeRegioes,
+    },
+  };
+}
+
+function applySnapshot(snap) {
+  const f = snap.form || {};
+  const s = snap.state || {};
+  // form fields
+  if (f.empresa       !== undefined) document.getElementById('empresa').value = f.empresa;
+  if (f.mesano        !== undefined) document.getElementById('mesano').value  = f.mesano;
+  if (f.consultor     !== undefined) document.getElementById('consultor').value = f.consultor;
+  if (f.nomeCorretora !== undefined) { const el = document.getElementById('nome-corretora'); if (el) el.value = f.nomeCorretora; }
+  if (f.aSeguradora   !== undefined) { const el = document.getElementById('a-seg'); if (el) { el.value = f.aSeguradora; syncAtualPlanOpts && syncAtualPlanOpts(); } }
+  if (f.aPlano        !== undefined) { const el = document.getElementById('a-plano'); if (el) el.value = f.aPlano; }
+  if (f.aVidas        !== undefined) { const el = document.getElementById('a-vidas'); if (el) el.value = f.aVidas; }
+  if (f.aValorRaw     !== undefined) { const el = document.getElementById('a-valor'); if (el) el.value = f.aValorRaw; }
+  if (f.aReembolsoVal !== undefined) { const el = document.getElementById('a-reembolso'); if (el) el.value = f.aReembolsoVal; }
+  if (f.bradPlano     !== undefined) { const el = document.getElementById('brad-plano'); if (el) el.value = f.bradPlano; }
+  if (f.bradAcom      !== undefined) { const el = document.getElementById('brad-acom'); if (el) el.value = f.bradAcom; }
+  if (f.bradVidas     !== undefined) { const el = document.getElementById('brad-vidas'); if (el) el.value = f.bradVidas; }
+  if (f.bradValorRaw  !== undefined) { const el = document.getElementById('brad-valor'); if (el) el.value = f.bradValorRaw; }
+  if (f.bradReembolsoVal !== undefined) { const el = document.getElementById('brad-reembolso'); if (el) el.value = f.bradReembolsoVal; }
+  // state
+  if (s.copAtual      !== undefined) { state.copAtual = s.copAtual; setAtualCop(s.copAtual); }
+  if (s.copBrad       !== undefined) { state.copBrad  = s.copBrad;  setBradCop(s.copBrad); }
+  if (s.atualReembShow !== undefined) {
+    state.atualReembShow = s.atualReembShow;
+    const cb = document.getElementById('rs-atual'); if (cb) cb.checked = s.atualReembShow;
+    const ct = document.getElementById('atual-reemb-container'); if (ct) ct.style.display = s.atualReembShow ? '' : 'none';
+  }
+  if (s.bradReembShow !== undefined) {
+    state.bradReembShow = s.bradReembShow;
+    const cb = document.getElementById('rs-brad'); if (cb) cb.checked = s.bradReembShow;
+    const ct = document.getElementById('brad-reemb-container'); if (ct) ct.style.display = s.bradReembShow ? '' : 'none';
+  }
+  if (s.showCop   !== undefined) { state.showCop   = s.showCop;   const el = document.getElementById('toggle-cop');  if (el) el.checked = s.showCop; }
+  if (s.showWait  !== undefined) { state.showWait  = s.showWait;  const el = document.getElementById('toggle-wait'); if (el) el.checked = s.showWait; }
+  if (s.showDiff  !== undefined) { state.showDiff  = s.showDiff;  const el = document.getElementById('toggle-diff'); if (el) el.checked = s.showDiff; }
+  if (s.showAtual !== undefined) { state.showAtual = s.showAtual; const el = document.getElementById('toggle-atual'); if (el) el.checked = s.showAtual; }
+  if (s.showRede  !== undefined) { state.showRede  = s.showRede;  const el = document.getElementById('toggle-rede'); if (el) el.checked = s.showRede; }
+  if (s.redeRegioes !== undefined) {
+    state.redeRegioes = { ...state.redeRegioes, ...s.redeRegioes };
+    Object.entries(state.redeRegioes).forEach(([r, v]) => {
+      const cb = document.querySelector(`input[data-regiao="${r}"]`); if (cb) cb.checked = v;
+    });
+  }
+  if (s.bradPlans !== undefined) {
+    state.bradPlans = s.bradPlans;
+    renderBradPlans && renderBradPlans();
+  }
+  render();
+}
+
+async function saveSnapshot() {
+  const empresa = document.getElementById('empresa')?.value.trim() || 'Sem nome';
+  const mesano  = document.getElementById('mesano')?.value || '';
+  const [y, m] = mesano.split('-');
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesLabel = m ? `${meses[+m-1]}/${y}` : '';
+  const label = `${empresa}${mesLabel ? ' · ' + mesLabel : ''}`;
+
+  const btn = document.getElementById('save-snap-btn');
+  btn.disabled = true; btn.textContent = '💾 Salvando…';
+  try {
+    const res = await fetch(`${API}/crm/propostas`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ app: 'bradesco-rede', label, payload: getSnapshot() }),
+    });
+    if (!res.ok) throw new Error('Erro ao salvar');
+    showToast('✅ Proposta salva!');
+  } catch(e) {
+    showToast('❌ Erro ao salvar. Tente novamente.');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Salvar';
+  }
+}
+
+async function openHistPanel() {
+  document.getElementById('hist-overlay').classList.add('open');
+  document.getElementById('hist-panel').classList.add('open');
+  await loadHistList();
+}
+
+function closeHistPanel() {
+  document.getElementById('hist-overlay').classList.remove('open');
+  document.getElementById('hist-panel').classList.remove('open');
+}
+
+async function loadHistList() {
+  const list = document.getElementById('hist-list');
+  list.innerHTML = '<div class="hist-empty">Carregando…</div>';
+  try {
+    const res = await fetch(`${API}/crm/propostas?app=bradesco-rede`, { credentials: 'include' });
+    const { propostas } = await res.json();
+    if (!propostas || propostas.length === 0) {
+      list.innerHTML = '<div class="hist-empty">Nenhuma proposta salva ainda.<br>Clique em 💾 Salvar para começar.</div>';
+      return;
+    }
+    list.innerHTML = propostas.map(p => {
+      const dt = new Date(p.atualizado_em).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+      return `<div class="hist-item" onclick="loadSnapshot(${p.id})">
+        <div class="hist-item-info">
+          <div class="hist-item-label">${esc(p.label)}</div>
+          <div class="hist-item-meta">Salvo em ${dt}</div>
+        </div>
+        <button class="hist-item-del" onclick="event.stopPropagation(); deleteSnapshot(${p.id}, this)" title="Excluir">🗑</button>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="hist-empty">Erro ao carregar histórico.</div>';
+  }
+}
+
+async function loadSnapshot(id) {
+  try {
+    const res = await fetch(`${API}/crm/propostas/${id}`, { credentials: 'include' });
+    const { proposta } = await res.json();
+    const snap = typeof proposta.payload === 'string' ? JSON.parse(proposta.payload) : proposta.payload;
+    applySnapshot(snap);
+    closeHistPanel();
+    showToast('✅ Proposta carregada!');
+  } catch(e) {
+    showToast('❌ Erro ao carregar proposta.');
+  }
+}
+
+async function deleteSnapshot(id, btn) {
+  btn.textContent = '…';
+  try {
+    await fetch(`${API}/crm/propostas/${id}`, { method: 'DELETE', credentials: 'include' });
+    await loadHistList();
+    showToast('🗑 Proposta excluída.');
+  } catch(e) {
+    btn.textContent = '🗑';
+    showToast('❌ Erro ao excluir.');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('hist-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
 </script>
 </body>
