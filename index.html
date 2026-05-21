@@ -2002,7 +2002,11 @@ function showPdfAssignmentUI() {
   const n = _parsedPdfsBatch.length;
   let html = `<div style="margin-top:4px;font-size:12px;font-weight:600;color:#555">Identifique ${n === 1 ? 'o PDF' : 'os PDFs'}:</div>`;
   _parsedPdfsBatch.forEach((pdf, i) => {
-    const guessedCop = /cop/i.test(pdf.name);
+    const allText = pdf.pages.flat().join('\n');
+    const contentCopMatch = allText.match(/Coparticipa[çc][aã]o\s+(N[aã]o|Sim|\d+%)/i);
+    const guessedCop = contentCopMatch
+      ? contentCopMatch[1].toLowerCase().replace('ã','a') !== 'nao'
+      : /cop/i.test(pdf.name);
     html += `
       <div style="margin:5px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-size:11px;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#333" title="${pdf.name}">📄 ${pdf.name}</span>
