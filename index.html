@@ -1605,7 +1605,6 @@ function buildRedeSlide(d, regiaoKey) {
     { key: 'N',   label: 'NACIONAL' },
     { key: 'NP',  label: 'NAC. PLUS' },
   ];
-  // Mapeamento: nome do plano (bradPlans) → chave do plano na rede
   const PLAN_TO_KEY = {
     'Efetivo':      'Ef',
     'Efetivo Plus': 'EP',
@@ -1615,49 +1614,70 @@ function buildRedeSlide(d, regiaoKey) {
     'Nacional Plus':'NP',
   };
 
-  // Planos selecionados a partir dos bradPlans importados
   const selectedPlans = new Set();
   (d.bradPlans || []).forEach(p => {
     const key = PLAN_TO_KEY[p.plano];
     if (key) selectedPlans.add(key);
   });
   const filterActive = selectedPlans.size > 0;
-
-  // Colunas visíveis: apenas os planos selecionados (ou todos)
   const visibleCols = filterActive
     ? PLAN_COLS.filter(c => selectedPlans.has(c.key))
     : PLAN_COLS;
 
-  const RED = '#CC0000';
+  const RED = '#920031';
   const thBase = `padding:7px 4px;font-size:8px;font-weight:800;color:#fff;text-align:center;letter-spacing:.5px;border-left:1px solid rgba(255,255,255,.2);line-height:1.2`;
   const tdCid  = `font-size:9.5px;font-weight:800;color:${RED};background:#FFF5F5;text-align:center;padding:6px 5px;border:1px solid #F0E0E0;vertical-align:middle;line-height:1.35;white-space:pre-line`;
   const tdNome = `font-size:10px;color:#1A1A3E;padding:5px 8px;border:1px solid #F0F0F5;vertical-align:middle;line-height:1.3`;
   const tdPlan = `font-size:8.5px;font-weight:700;color:${RED};text-align:center;padding:5px 3px;border:1px solid #F0F0F5;vertical-align:middle;letter-spacing:.2px`;
   const tdVoid = `font-size:8px;color:#E0E0E8;text-align:center;padding:5px 3px;border:1px solid #F0F0F5;vertical-align:middle`;
+  const planHeaders = visibleCols.map(c => `<th style="${thBase}">${c.label}</th>`).join('');
 
-  let rows = '';
+  // ── Montar lista plana de linhas ──────────────────────────────────
+  const allRows = [];
   regiao.cidades.forEach(cidade => {
-    // Filtra hospitais: mostra apenas os credenciados em pelo menos um plano selecionado
     const hospFiltrados = cidade.hospitais.filter(h =>
       !filterActive || (h.plans || []).some(p => selectedPlans.has(p))
     );
-    if (hospFiltrados.length === 0) return;
-
-    hospFiltrados.forEach((h, hi) => {
-      const planCells = visibleCols.map(col =>
-        (h.plans || []).includes(col.key)
-          ? `<td style="${tdPlan}">${h.tipo || 'H/P.S'}</td>`
-          : `<td style="${tdVoid}">—</td>`
-      ).join('');
-      const cidCell = hi === 0
-        ? `<td rowspan="${hospFiltrados.length}" style="${tdCid}">${esc(cidade.nome)}</td>`
-        : '';
-      const bg = hi % 2 === 0 ? '#fff' : '#FAFAFA';
-      rows += `<tr style="background:${bg}">${cidCell}<td style="${tdNome}">${esc(h.nome)}</td>${planCells}</tr>`;
-    });
+    if (!hospFiltrados.length) return;
+    hospFiltrados.forEach(h => allRows.push({ cidade: cidade.nome, hosp: h }));
   });
+  if (!allRows.length) return '';
 
-  const planHeaders = visibleCols.map(c => `<th style="${thBase}">${c.label}</th>`).join('');
+  // ── Paginar (máx 13 linhas por slide) ────────────────────────────
+  const MAX_ROWS = 13;
+  const pages = [];
+  let cur = [], curCount = 0;
+
+  const cityGroups = [];
+  let i = 0;
+  while (i < allRows.length) {
+    const nome = allRows[i].cidade;
+    let j = i;
+    while (j < allRows.length && allRows[j].cidade === nome) j++;
+    cityGroups.push({ nome, rows: allRows.slice(i, j) });
+    i = j;
+  }
+
+  for (const grp of cityGroups) {
+    const n = grp.rows.length;
+    if (curCount > 0 && curCount + n > MAX_ROWS) {
+      pages.push(cur); cur = []; curCount = 0;
+    }
+    if (n > MAX_ROWS) {
+      for (let k = 0; k < n; k++) {
+        cur.push(grp.rows[k]); curCount++;
+        if (curCount >= MAX_ROWS) { pages.push(cur); cur = []; curCount = 0; }
+      }
+    } else {
+      grp.rows.forEach(r => cur.push(r));
+      curCount += n;
+    }
+  }
+  if (cur.length) pages.push(cur);
+
+  // ── Renderizar cada página ────────────────────────────────────────
+  const totalPages = pages.length;
+  const regiaoId  = regiaoKey.replace(/\s+/g, '-').toLowerCase();
   const legend = `
     <div style="margin-top:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
       <span style="font-size:9px;font-weight:800;color:#1A1A3E">LEGENDA:</span>
@@ -1667,16 +1687,45 @@ function buildRedeSlide(d, regiaoKey) {
       <span style="margin-left:auto;font-size:9px;color:#AAAABC">Verifique disponibilidade em bradescosaude.com.br</span>
     </div>`;
 
-  const regiaoId = regiaoKey.replace(/\s+/g, '-').toLowerCase();
-  return `
-  <div class="slide-box" id="sl-rede-${regiaoId}">
+  return pages.map((pageRows, pi) => {
+    const annotated = [];
+    let k = 0;
+    while (k < pageRows.length) {
+      const cid = pageRows[k].cidade;
+      let end = k;
+      while (end < pageRows.length && pageRows[end].cidade === cid) end++;
+      for (let m = k; m < end; m++) {
+        annotated.push({ ...pageRows[m], isFirst: m === k, span: end - k });
+      }
+      k = end;
+    }
+
+    let rows = '';
+    annotated.forEach((row, ri) => {
+      const planCells = visibleCols.map(col =>
+        (row.hosp.plans || []).includes(col.key)
+          ? `<td style="${tdPlan}">${row.hosp.tipo || 'H/P.S'}</td>`
+          : `<td style="${tdVoid}">—</td>`
+      ).join('');
+      const cidCell = row.isFirst
+        ? `<td rowspan="${row.span}" style="${tdCid}">${esc(row.cidade)}</td>`
+        : '';
+      const bg = ri % 2 === 0 ? '#fff' : '#FAFAFA';
+      rows += `<tr style="background:${bg}">${cidCell}<td style="${tdNome}">${esc(row.hosp.nome)}</td>${planCells}</tr>`;
+    });
+
+    const pageLabel = totalPages > 1 ? ` <span style="font-size:10px;color:#999;font-weight:400">(${pi + 1}/${totalPages})</span>` : '';
+    const slideId   = totalPages > 1 ? `sl-rede-${regiaoId}-p${pi + 1}` : `sl-rede-${regiaoId}`;
+
+    return `
+  <div class="slide-box" id="${slideId}" data-rede-slide="${regiaoId}">
     <div class="s-rede">
       ${logoWm}
       <div class="slide-sec-head" style="margin-bottom:14px">
         <div class="slide-sec-bar" style="background:${RED};height:44px"></div>
         <div>
           <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:${RED}">Bradesco Saúde · Rede Credenciada</div>
-          <div class="slide-sec-title">Lista de Hospitais por Linha de Planos — ${esc(regiao.label)}</div>
+          <div class="slide-sec-title">Lista de Hospitais — ${esc(regiao.label)}${pageLabel}</div>
           <div class="slide-sec-sub">${esc(regiao.subtitulo)}</div>
         </div>
       </div>
@@ -1693,6 +1742,7 @@ function buildRedeSlide(d, regiaoKey) {
       ${legend}
     </div>
   </div>`;
+  }).join('');
 }
 
 /* ═══════════ SLIDE: CONTRACAPA ═══════════ */
@@ -1819,18 +1869,10 @@ async function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [297, 167] });
     const d = getData();
-    // Slides de comparação: detecta quais existem no DOM
-    const compIds = ['sl-comp-main','sl-comp-cop','sl-comp-nocop'].filter(id => document.getElementById(id));
-    const ids = ['sl-cover', ...compIds];
-    if (d.showCop && d.bradPlans.some(p => p.cop)) ids.push('sl-cop');
-    if (d.showWait) ids.push('sl-wait');
-    if (d.showDiff) ids.push('sl-diff');
-    if (d.showRede) {
-      ['ABCDM', 'SP Capital', 'Interior'].forEach(r => {
-        if (d.redeRegioes[r]) ids.push(`sl-rede-${r.replace(/\s+/g,'-').toLowerCase()}`);
-      });
-    }
-    ids.push('sl-back');
+    // Coleta todos os slides na ordem do DOM — suporta paginação e novos estados automaticamente
+    const ids = Array.from(document.querySelectorAll('#doc-wrap .slide-box'))
+      .map(el => el.id)
+      .filter(Boolean);
 
     for (const [idx, sid] of ids.entries()) {
       const el = document.getElementById(sid);
