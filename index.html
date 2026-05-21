@@ -2390,9 +2390,21 @@ function applySnapshot(snap) {
   if (f.bradVidas     !== undefined) { const el = document.getElementById('brad-vidas'); if (el) el.value = f.bradVidas; }
   if (f.bradValorRaw  !== undefined) { const el = document.getElementById('brad-valor'); if (el) el.value = f.bradValorRaw; }
   if (f.bradReembolsoVal !== undefined) { const el = document.getElementById('brad-reembolso'); if (el) el.value = f.bradReembolsoVal; }
-  // state
-  if (s.copAtual      !== undefined) { state.copAtual = s.copAtual; setAtualCop(s.copAtual); }
-  if (s.copBrad       !== undefined) { state.copBrad  = s.copBrad;  setBradCop(s.copBrad); }
+  // state — atualiza diretamente sem chamar render() interno
+  if (s.copAtual !== undefined) {
+    state.copAtual = s.copAtual;
+    const sim = document.getElementById('cop-a-sim'); const nao = document.getElementById('cop-a-nao');
+    if (sim) sim.className = 'cop-btn' + (s.copAtual ? ' active-sim' : '');
+    if (nao) nao.className = 'cop-btn' + (!s.copAtual ? ' active-nao' : '');
+  }
+  if (s.copBrad !== undefined) {
+    state.copBrad = s.copBrad;
+    const sim = document.getElementById('cop-b-sim'); const nao = document.getElementById('cop-b-nao');
+    if (sim) sim.className = 'cop-btn' + (s.copBrad ? ' active-sim' : '');
+    if (nao) nao.className = 'cop-btn' + (!s.copBrad ? ' active-nao' : '');
+    const wrap = document.getElementById('opt-cop-wrap');
+    if (wrap) wrap.style.display = s.copBrad ? '' : 'none';
+  }
   if (s.atualReembShow !== undefined) {
     state.atualReembShow = s.atualReembShow;
     const cb = document.getElementById('rs-atual'); if (cb) cb.checked = s.atualReembShow;
@@ -2485,13 +2497,17 @@ async function loadHistList() {
 async function loadSnapshot(id) {
   try {
     const res = await fetch(`${API}/crm/propostas/${id}`, { credentials: 'include' });
-    const { proposta } = await res.json();
-    const snap = typeof proposta.payload === 'string' ? JSON.parse(proposta.payload) : proposta.payload;
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.proposta) throw new Error('Proposta não encontrada');
+    const snap = typeof data.proposta.payload === 'string'
+      ? JSON.parse(data.proposta.payload)
+      : data.proposta.payload;
     applySnapshot(snap);
     closeHistPanel();
     showToast('✅ Proposta carregada!');
   } catch(e) {
-    showToast('❌ Erro ao carregar proposta.');
+    showToast('❌ ' + (e.message || 'Erro ao carregar'));
   }
 }
 
