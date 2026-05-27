@@ -1454,27 +1454,32 @@ function buildCompSlide(d, plans, suffix, copFlag) {
   }
   const title = (showAtual ? 'Por que migrar para a <em>Bradesco Saúde?</em>' : 'Proposta <em>Bradesco Saúde</em>') + copBadge;
 
-  // Cards das barras
-  const bradCards = plans.map((p, i) => {
+  // Colunas individuais por plano — um canvas por barra garante alinhamento perfeito
+  const bradCols = plans.map((p, i) => {
     const ganhoMensal = d.atual.valor - p.valor;
     const ganhoAnual  = ganhoMensal * 12;
     const ganhoClass  = ganhoAnual > 200 ? 'positivo' : ganhoAnual < -200 ? 'negativo' : 'neutro';
     const ganhoIcon   = ganhoAnual > 200 ? '▼' : ganhoAnual < -200 ? '▲' : '≈';
     const ganhoLabel  = ganhoAnual > 200 ? 'Economia' : ganhoAnual < -200 ? 'Invest. adicional' : 'Equivalente';
     const color = BRAD_COLORS[i] || BRAD_COLORS[BRAD_COLORS.length - 1];
+    const sep = i < plans.length - 1
+      ? `<div style="width:1px;background:var(--border);flex-shrink:0;align-self:stretch"></div>` : '';
     return `
-    <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 6px">
-      <div style="width:10px;height:10px;border-radius:50%;background:${color};margin-bottom:2px"></div>
-      <div style="font-size:10px;font-weight:800;color:${color};text-align:center;line-height:1.2">${esc(p.label||p.plano)}</div>
-      ${p.acom ? `<div style="font-size:9px;color:var(--muted)">${esc(p.acom)}</div>` : ''}
-      <div style="font-size:9px;color:var(--muted)">${vidas} vida${vidas !== 1 ? 's' : ''}</div>
-      ${p.reembolso ? `<span class="reembolso-chip" style="font-size:8px">↩ ${fmt(p.reembolso)}</span>` : ''}
-      ${showAtual && d.atual.valor > 0 && p.valor > 0 ? `
-        <span class="ganho-chip ${ganhoClass}" style="font-size:9px;margin-top:4px;white-space:nowrap">${ganhoIcon} ${ganhoLabel}</span>
-        <div style="font-size:8px;color:var(--muted);white-space:nowrap">${fmt(Math.abs(ganhoAnual))}/ano</div>
-      ` : ''}
-    </div>`;
-  }).join(`<div style="width:1px;background:var(--border);margin:0 4px;align-self:stretch"></div>`);
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+      <div class="chart-wrap"><canvas id="ch-brad-${suffix}-${i}"></canvas></div>
+      <div style="border-top:1px solid var(--border);padding:6px 4px 0;display:flex;flex-direction:column;align-items:center;gap:2px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${color}"></div>
+        <div style="font-size:11px;font-weight:800;color:${color};text-align:center;line-height:1.2">${esc(p.label||p.plano)}</div>
+        ${p.acom ? `<div style="font-size:10px;color:var(--muted)">${esc(p.acom)}</div>` : ''}
+        <div style="font-size:10px;color:var(--muted)">${vidas} vida${vidas !== 1 ? 's' : ''}</div>
+        ${p.reembolso ? `<span class="reembolso-chip" style="font-size:10px">↩ ${fmt(p.reembolso)}</span>` : ''}
+        ${showAtual && d.atual.valor > 0 && p.valor > 0 ? `
+          <span class="ganho-chip ${ganhoClass}" style="font-size:11px;margin-top:3px;white-space:nowrap">${ganhoIcon} ${ganhoLabel}</span>
+          <div style="font-size:10px;color:var(--muted);white-space:nowrap">${fmt(Math.abs(ganhoAnual))}/ano</div>
+        ` : ''}
+      </div>
+    </div>${sep}`;
+  }).join('');
 
   const atualColHtml = showAtual ? `
         <div style="width:180px;flex-shrink:0;display:flex;flex-direction:column;align-items:center">
@@ -1501,12 +1506,11 @@ function buildCompSlide(d, plans, suffix, copFlag) {
       <div class="s-title">${title}</div>
       <div style="display:flex;gap:0;align-items:stretch">
         ${atualColHtml}
-        <div style="flex:1;display:flex;flex-direction:column">
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column">
           <div class="col-label" style="color:var(--red);text-align:center">Bradesco Saúde</div>
           <span class="ins-tag" style="border-color:var(--red);color:var(--red);display:block;text-align:center;margin-bottom:8px">Bradesco</span>
-          <div class="chart-wrap" style="flex:1"><canvas id="ch-brad-${suffix}"></canvas></div>
-          <div style="display:flex;justify-content:space-around;padding-top:8px;margin-top:4px;border-top:1px solid var(--border)">
-            ${bradCards}
+          <div style="flex:1;min-width:0;display:flex;align-items:stretch">
+            ${bradCols}
           </div>
         </div>
       </div>
@@ -1878,31 +1882,51 @@ function drawCharts(d) {
       },
     };
 
-    // Plano atual
+    // Chart Plano Atual — sempre renderiza (com ou sem valor) para manter grid lines e altura consistente
     const ca = document.getElementById(`ch-atual-${suffix}`);
-    if (ca && d.showAtual && d.atual.valor > 0) charts.push(new Chart(ca, {
-      type: 'bar',
-      data: { labels: [''], datasets: [{ data: [d.atual.valor], backgroundColor: atualColor + 'DD', borderRadius: 8, borderSkipped: false }] },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        devicePixelRatio: 3,
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        animation: { duration: 250 },
-        layout: { padding: { top: 28 } },
-        scales: { x: { grid: { display: false }, border: { display: false }, ticks: { display: false } }, y: scaleOpts },
-      },
-      plugins: [labelPlugin],
-    }));
+    if (ca && d.showAtual) {
+      const hasAtual = d.atual.valor > 0;
+      charts.push(new Chart(ca, {
+        type: 'bar',
+        data: { labels: [''], datasets: [{ data: [hasAtual ? d.atual.valor : 0], backgroundColor: hasAtual ? atualColor + 'DD' : 'transparent', borderRadius: 8, borderSkipped: false }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          devicePixelRatio: 3,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          animation: { duration: 250 },
+          layout: { padding: { top: 28 } },
+          scales: { x: { grid: { display: false }, border: { display: false }, ticks: { display: false } }, y: { min: 0, max: yMax, border: { display: false }, grid: { color: '#F0F0F5' }, ticks: { display: false }, afterFit(scale) { scale.width = 0; } } },
+        },
+        plugins: [labelPlugin],
+      }));
+      // Aviso visual se o valor não foi preenchido
+      if (!hasAtual) {
+        const wrap = ca.parentElement;
+        if (wrap && !wrap.querySelector('.sem-valor-msg')) {
+          const msg = document.createElement('div');
+          msg.className = 'sem-valor-msg';
+          msg.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;font-weight:700;text-align:center;pointer-events:none;';
+          msg.textContent = 'Informe o valor do plano atual';
+          wrap.style.position = 'relative';
+          wrap.appendChild(msg);
+        }
+      }
+    }
 
-    // Bradesco — barras por plano
-    const cb = document.getElementById(`ch-brad-${suffix}`);
-    if (cb && plans.length) {
-      const labels   = plans.map(p => p.label || p.plano);
-      const data     = plans.map(p => p.valor);
-      const bgColors = plans.map((_, i) => (BRAD_COLORS[i] || BRAD_COLORS[0]) + 'DD');
+    // Um chart por plano Bradesco — alinhamento perfeito com os labels abaixo
+    const yNoAxis = {
+      min: 0, max: yMax, border: { display: false },
+      grid: { color: '#F0F0F5' },
+      ticks: { display: false },
+      afterFit(scale) { scale.width = 0; }, // sem reserva de espaço — barra centralizada na coluna
+    };
+    plans.forEach((p, i) => {
+      const cb = document.getElementById(`ch-brad-${suffix}-${i}`);
+      if (!cb) return;
+      const yAxis = (!d.showAtual && i === 0) ? scaleOpts : yNoAxis;
       charts.push(new Chart(cb, {
         type: 'bar',
-        data: { labels, datasets: [{ data, backgroundColor: bgColors, borderRadius: 8, borderSkipped: false }] },
+        data: { labels: [''], datasets: [{ data: [p.valor], backgroundColor: (BRAD_COLORS[i] || BRAD_COLORS[0]) + 'DD', borderRadius: 8, borderSkipped: false }] },
         options: {
           responsive: true, maintainAspectRatio: false,
           devicePixelRatio: 3,
@@ -1911,12 +1935,12 @@ function drawCharts(d) {
           layout: { padding: { top: 28 } },
           scales: {
             x: { grid: { display: false }, border: { display: false }, ticks: { display: false } },
-            y: scaleOpts,
+            y: yAxis,
           },
         },
         plugins: [labelPlugin],
       }));
-    }
+    });
   }); // fim slideGroups.forEach
 }
 
