@@ -1375,14 +1375,18 @@ function render() {
 }
 
 function applyZoom() {
+  // No celular (≤767px) não aplica zoom — slides rolam horizontalmente em tamanho real
+  if (window.innerWidth <= 767) {
+    document.querySelectorAll('.slide-box').forEach(el => el.style.zoom = 1);
+    return;
+  }
   const area = document.querySelector('.preview');
   if (!area) return;
   const st = getComputedStyle(area);
   const hPad = parseFloat(st.paddingLeft) + parseFloat(st.paddingRight);
   const avail = area.clientWidth - hPad;
-  // Zoom mínimo 0.45 — em telas pequenas o slide rola horizontalmente
-  // em vez de encolher a ponto de ficar ilegível
-  const z = Math.max(0.45, Math.min(1, avail / 960));
+  // Zoom mínimo 0.65 — garante que fontes fiquem legíveis mesmo em telas menores
+  const z = Math.max(0.65, Math.min(1, avail / 960));
   document.querySelectorAll('.slide-box').forEach(el => el.style.zoom = z);
 }
 window.addEventListener('resize', applyZoom);
@@ -1828,7 +1832,7 @@ function drawCharts(d) {
         chart.getDatasetMeta(di).data.forEach((bar, i) => {
           const v = ds.data[i]; if (!v || bar.height < 18) return;
           ctx.save();
-          ctx.font = 'bold 10px "Open Sans", sans-serif';
+          ctx.font = 'bold 14px "Open Sans", sans-serif';
           ctx.fillStyle = '#fff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -1870,7 +1874,7 @@ function drawCharts(d) {
       grid: { color: '#F0F0F5' },
       ticks: {
         callback: v => 'R$' + (v >= 1000 ? (v/1000).toLocaleString('pt-BR', {maximumFractionDigits:0}) + 'k' : v),
-        font: { size: 9 }, color: '#9999AA', maxTicksLimit: 6,
+        font: { size: 11 }, color: '#9999AA', maxTicksLimit: 6,
       },
     };
 
@@ -1942,9 +1946,9 @@ async function gerarPDF() {
         imageTimeout: 0,
       });
       el.style.zoom = prevZoom;
-      const img = canvas.toDataURL('image/jpeg', 0.97);
+      const img = canvas.toDataURL('image/png');
       if (idx > 0) pdf.addPage();
-      pdf.addImage(img, 'JPEG', 0, 0, 297, 167);
+      pdf.addImage(img, 'PNG', 0, 0, 297, 167);
     }
 
     const name = `bradesco_${d.empresa.replace(/[^\w]/g,'_').slice(0,25)}_${d.mesano.replace('/','_')}.pdf`;
