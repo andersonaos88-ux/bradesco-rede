@@ -89,7 +89,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
 .gen-btn:hover { background: var(--red2); box-shadow: 0 4px 18px rgba(204,0,0,.3); }
 
 /* ── PREVIEW ── */
-.preview { padding: 28px 24px; overflow-y: auto; background: #C8C8CC; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.preview { padding: 28px 24px; overflow-y: auto; overflow-x: auto; background: #C8C8CC; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
 .preview-bar { width: 100%; display: flex; align-items: center; justify-content: space-between; background: var(--white); border-radius: 10px; padding: 10px 18px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 .preview-bar span { font-size: 12px; font-weight: 600; color: var(--muted); }
 .pdf-btn { padding: 8px 18px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s; font-family: inherit; }
@@ -123,7 +123,7 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
 .hist-item-del:hover { color: #dc2626; background: #fef2f2; }
 .hist-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 300; transition: transform .25s; pointer-events: none; }
 .hist-toast.show { transform: translateX(-50%) translateY(0); }
-.slides-wrap { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.slides-wrap { display: flex; flex-direction: column; gap: 20px; align-items: flex-start; }
 .slide-box { box-shadow: 0 6px 28px rgba(0,0,0,.25); border-radius: 6px; overflow: hidden; }
 .empty { min-height: 360px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); gap: 10px; }
 .empty .icon { font-size: 44px; opacity: .35; }
@@ -162,26 +162,26 @@ body { font-family: 'Open Sans', system-ui, sans-serif; background: var(--gray-b
 .comp-col { display: flex; flex-direction: column; }
 .comp-col.atual { width: 200px; flex-shrink: 0; }
 .comp-col.brad  { flex: 1; }
-.col-label { text-align: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text); margin-bottom: 10px; }
-.ins-tag { display: inline-block; padding: 4px 14px; border-radius: 20px; border: 1.5px solid; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.col-label { text-align: center; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text); margin-bottom: 10px; }
+.ins-tag { display: inline-block; padding: 4px 14px; border-radius: 20px; border: 1.5px solid; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
 .chart-wrap { height: 240px; position: relative; }
 .plan-meta { display: flex; flex-direction: column; align-items: center; margin-top: 6px; gap: 3px; }
-.plan-name-label { font-size: 10px; font-weight: 700; }
-.cop-chip { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: .4px; }
+.plan-name-label { font-size: 12px; font-weight: 700; }
+.cop-chip { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: .4px; }
 .cop-chip.sim { background: #dcfce7; color: #15803d; }
 .cop-chip.nao { background: #fee2e2; color: #b91c1c; }
-.vidas-chip { font-size: 9px; color: var(--muted); }
-.reembolso-chip { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #eff6ff; color: #1d4ed8; }
-.ganho-chip { font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; letter-spacing: .3px; white-space: nowrap; }
+.vidas-chip { font-size: 11px; color: var(--muted); }
+.reembolso-chip { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #eff6ff; color: #1d4ed8; }
+.ganho-chip { font-size: 13px; font-weight: 800; padding: 5px 14px; border-radius: 20px; letter-spacing: .3px; white-space: nowrap; }
 .ganho-chip.positivo { background: #dcfce7; color: #15803d; }
 .ganho-chip.negativo { background: #fee2e2; color: #b91c1c; }
 .ganho-chip.neutro   { background: #f1f5f9; color: var(--muted); }
-.ganho-label { font-size: 8px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+.ganho-label { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
 .vert-sep { width: 1px; background: var(--border); margin: 0 20px; }
 .divider  { height: 3px; background: linear-gradient(90deg, var(--red), #ff6666); border-radius: 2px; margin: 20px 0 12px; }
 .legend-row { display: flex; align-items: center; justify-content: center; gap: 16px; }
-.leg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); font-weight: 700; }
-.leg-dot { width: 9px; height: 9px; border-radius: 50%; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); font-weight: 700; }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; }
 
 /* COP SLIDE */
 .s-cop { width: 960px; min-height: 540px; background: #fff; padding: 44px 56px; position: relative; }
@@ -1380,7 +1380,9 @@ function applyZoom() {
   const st = getComputedStyle(area);
   const hPad = parseFloat(st.paddingLeft) + parseFloat(st.paddingRight);
   const avail = area.clientWidth - hPad;
-  const z = Math.min(1, avail / 960);
+  // Zoom mínimo 0.45 — em telas pequenas o slide rola horizontalmente
+  // em vez de encolher a ponto de ficar ilegível
+  const z = Math.max(0.45, Math.min(1, avail / 960));
   document.querySelectorAll('.slide-box').forEach(el => el.style.zoom = z);
 }
 window.addEventListener('resize', applyZoom);
@@ -1520,8 +1522,11 @@ function buildCopSlide(d) {
 
   // Filtra apenas os planos que têm coparticipação
   const copPlans = d.bradPlans.filter(p => p.cop);
+  // Deduplica por tipo de plano — copay é idêntico para o mesmo plano,
+  // independente do nível de reembolso selecionado
+  const uniqueCopPlans = copPlans.filter((p, i, arr) => arr.findIndex(q => q.plano === p.plano) === i);
   // Se nenhum plano tem cop, usa o plano do formulário como fallback
-  const plansToShow = copPlans.length > 0 ? copPlans : [{
+  const plansToShow = uniqueCopPlans.length > 0 ? uniqueCopPlans : [{
     plano: d.brad.plano, acom: d.brad.acom, cop: true
   }];
 
@@ -1876,6 +1881,7 @@ function drawCharts(d) {
       data: { labels: [''], datasets: [{ data: [d.atual.valor], backgroundColor: atualColor + 'DD', borderRadius: 8, borderSkipped: false }] },
       options: {
         responsive: true, maintainAspectRatio: false,
+        devicePixelRatio: 3,
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
         animation: { duration: 250 },
         layout: { padding: { top: 28 } },
@@ -1895,6 +1901,7 @@ function drawCharts(d) {
         data: { labels, datasets: [{ data, backgroundColor: bgColors, borderRadius: 8, borderSkipped: false }] },
         options: {
           responsive: true, maintainAspectRatio: false,
+          devicePixelRatio: 3,
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           animation: { duration: 250 },
           layout: { padding: { top: 28 } },
@@ -1929,12 +1936,13 @@ async function gerarPDF() {
       el.style.zoom = 1;
       const isWhite = !['sl-cover','sl-back'].includes(sid);
       const canvas = await html2canvas(el.firstElementChild, {
-        scale: 2, useCORS: true, logging: false,
+        scale: 3, useCORS: true, logging: false,
         backgroundColor: isWhite ? '#ffffff' : null,
         width: 960, height: el.firstElementChild.offsetHeight,
+        imageTimeout: 0,
       });
       el.style.zoom = prevZoom;
-      const img = canvas.toDataURL('image/jpeg', 0.94);
+      const img = canvas.toDataURL('image/jpeg', 0.97);
       if (idx > 0) pdf.addPage();
       pdf.addImage(img, 'JPEG', 0, 0, 297, 167);
     }
@@ -2133,12 +2141,40 @@ function applyFormFields(p) {
   if (p.valor) document.getElementById('brad-valor').value = p.valor.toFixed(2);
 }
 
-/* Extrai planos da página 3 do PDF */
+/* Normaliza string: maiúsculo + sem acentos (unicode explícito) */
+function _normLine(s) {
+  return s.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+/* Extrai todos os valores monetários de uma string */
+function _extractVals(str) {
+  const vals = [];
+  // "R$ 1.234,56" ou "R$ 109,76"
+  for (const m of str.matchAll(/R\$\s*([\d]{1,3}(?:\.[\d]{3})*,\d{2})/g)) {
+    const v = parseFloat(m[1].replace(/\./g,'').replace(',','.'));
+    if (v > 0) vals.push(v);
+  }
+  // standalone "15.234,00" (sem R$)
+  const nm = str.trim().match(/^([\d]{1,3}(?:\.[\d]{3})+,\d{2})$/);
+  if (nm) { const v = parseFloat(nm[1].replace(/\./g,'').replace(',','.')); if (v > 0) vals.push(v); }
+  // reembolso standalone "439,03"
+  const sm = str.trim().match(/^(\d{2,3},\d{2})$/);
+  if (sm) { const v = parseFloat(sm[1].replace(',','.')); if (v >= 50 && v < 2000) vals.push(v); }
+  return vals;
+}
+
+/* Extrai planos da página 3 do PDF
+   Estratégia: "between plans" — cada plano obtém valores SOMENTE
+   entre sua linha e a linha do PRÓXIMO plano. Elimina toda contaminação
+   cruzada da tabela comparativa. */
 function extractPlansFromPDF(pages) {
   const PLAN_MAP = {
     'EFETIVO PLUS': 'Efetivo Plus', 'EFETIVO': 'Efetivo',
-    'NACIONAL PLUS': 'Nacional Plus', 'NACIONAL FLEX': 'Flex', 'NACIONAL III': 'Nacional', 'NACIONAL': 'Nacional',
-    'FLEX': 'Flex', 'IDEAL': 'Ideal', 'REGIONAL': 'Regional', 'SAUDE+': 'Saúde +',
+    'NACIONAL PLUS': 'Nacional Plus', 'NACIONAL FLEX': 'Flex',
+    'NACIONAL III': 'Nacional', 'NACIONAL': 'Nacional',
+    'FLEX': 'Flex', 'IDEAL': 'Ideal', 'REGIONAL': 'Regional',
+    'SAUDE+': 'Saúde +', 'SAUDE +': 'Saúde +',
+    'PREMIUM': 'Premium',
   };
   const planNames = Object.keys(PLAN_MAP).sort((a,b) => b.length - a.length);
   const results = [];
@@ -2150,62 +2186,51 @@ function extractPlansFromPDF(pages) {
 
   for (const page of pagesToSearch) {
     const lines = page || [];
+
+    // ── Passo 1: mapeia todas as ocorrências de planos na página ──
+    const hits = [];
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim().toUpperCase();
-      const matchedKey = planNames.find(k => line.includes(k));
-      if (!matchedKey) continue;
+      const norm = _normLine(lines[i].trim());
+      const key = planNames.find(k => norm.includes(k));
+      if (key) hits.push({ i, key });
+    }
+
+    // ── Passo 2: para cada plano, extrai valores NA SUA JANELA EXCLUSIVA ──
+    for (let hi = 0; hi < hits.length; hi++) {
+      const { i, key } = hits[hi];
+      // Janela vai da linha do plano até (exclusive) a linha do próximo plano
+      const end = hi + 1 < hits.length
+        ? hits[hi + 1].i
+        : Math.min(i + 7, lines.length);
+
+      const window = lines.slice(i, end);
+      const allVals = window.flatMap(_extractVals);
+      const bigVals = allVals.filter(v => v >= 500);
+      if (!bigVals.length) continue;
+
+      const valor = Math.max(...bigVals);
 
       // Acomodação
       let acom = '';
-      const acomSearch = lines.slice(Math.max(0,i-2), i+5).join(' ').toUpperCase();
-      if (acomSearch.includes('QUARTO') || acomSearch.includes('APARTAMENTO')) acom = 'Apartamento';
-      else if (acomSearch.includes('ENFERMARIA')) acom = 'Enfermaria';
+      const acomNorm = _normLine(window.join(' '));
+      if (acomNorm.includes('APARTAMENTO') || acomNorm.includes('QUARTO')) acom = 'Apartamento';
+      else if (acomNorm.includes('ENFERMARIA')) acom = 'Enfermaria';
 
-      // Coleta TODOS os valores R$ nas linhas próximas (janela de 12 linhas)
-      const nearLines = lines.slice(Math.max(0,i-1), Math.min(i+12, lines.length));
-      const allVals = [];
-      for (const nl of nearLines) {
-        // Formato "R$ 1.234,56" ou "R$ 109,76"
-        const matches = [...nl.matchAll(/R\$\s*([\d]{1,3}(?:\.[\d]{3})*,\d{2})/g)];
-        for (const m of matches) {
-          const v = parseFloat(m[1].replace(/\./g,'').replace(',','.'));
-          if (v > 0) allVals.push(v);
-        }
-        // Formato standalone "15.234,00" (sem R$)
-        const nm = nl.trim().match(/^([\d]{1,3}(?:\.[\d]{3})+,\d{2})$/);
-        if (nm) {
-          const v = parseFloat(nm[1].replace(/\./g,'').replace(',','.'));
-          if (v > 0) allVals.push(v);
-        }
-        // Formato reembolso standalone "439,03" (centenas com vírgula)
-        const sm = nl.trim().match(/^(\d{2,3},\d{2})$/);
-        if (sm) {
-          const v = parseFloat(sm[1].replace(',','.'));
-          if (v >= 50 && v < 2000) allVals.push(v);
-        }
-      }
-
-      if (!allVals.length) continue;
-
-      // Valor total = maior valor encontrado
-      const valor = Math.max(...allVals);
-
-      // Reembolso = valor < 2000 e significativamente menor que o total
-      // (o reembolso do Bradesco vai de R$ 109,76 até R$ 878,06)
-      const hasEspecifico = /espec[íi]fico/i.test(nearLines.join(' '));
+      // Reembolso (Bradesco: R$ 109,76 ~ R$ 878,06)
       let reembolso = null;
-      if (hasEspecifico) {
-        const rembs = allVals.filter(v => v < 2000 && v !== valor && v >= 50);
-        if (rembs.length) reembolso = Math.max(...rembs); // pega o maior nível se houver mais de um
+      if (/espec[íi]fico/i.test(window.join(' '))) {
+        const rembs = allVals.filter(v => v >= 50 && v < valor);
+        if (rembs.length) reembolso = Math.max(...rembs);
       }
 
-      const planLabel = PLAN_MAP[matchedKey] + (acom ? ' ' + acom : '');
-      const key = planLabel + '|' + valor;
-      if (!seen.has(key) && valor) {
-        seen.add(key);
-        results.push({ plano: PLAN_MAP[matchedKey], acom, valor, label: planLabel, reembolso });
+      const planLabel = PLAN_MAP[key] + (acom ? ' ' + acom : '');
+      const dedupeKey = planLabel + '|' + valor;
+      if (!seen.has(dedupeKey)) {
+        seen.add(dedupeKey);
+        results.push({ plano: PLAN_MAP[key], acom, valor, label: planLabel, reembolso });
       }
     }
+
     if (results.length > 0) break;
   }
 
@@ -2540,5 +2565,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 </script>
+<script src="https://corretortech.com/ajuda-widget.js"></script>
 </body>
 </html>
