@@ -1946,9 +1946,9 @@ async function gerarPDF() {
         imageTimeout: 0,
       });
       el.style.zoom = prevZoom;
-      const img = canvas.toDataURL('image/png');
+      const img = canvas.toDataURL('image/jpeg', 0.92);
       if (idx > 0) pdf.addPage();
-      pdf.addImage(img, 'PNG', 0, 0, 297, 167);
+      pdf.addImage(img, 'JPEG', 0, 0, 297, 167);
     }
 
     const name = `bradesco_${d.empresa.replace(/[^\w]/g,'_').slice(0,25)}_${d.mesano.replace('/','_')}.pdf`;
