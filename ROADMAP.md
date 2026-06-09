@@ -37,8 +37,9 @@ dispersa em chips pequenos no slide comparativo.
 - Bradesco mais caro: slide se adapta para "Investimento adicional" (valor agregado),
   sem esconder.
 
-**Detalhe completo do plano de implementação:** ver descrição acima — pronto para
-desenvolver quando priorizado.
+**Detalhe completo do plano de implementação:**
+[`docs/planejamento/01-slide-resumo-executivo.md`](docs/planejamento/01-slide-resumo-executivo.md)
+— passo a passo pronto para desenvolver quando priorizado.
 
 ---
 
